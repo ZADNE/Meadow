@@ -30,6 +30,7 @@ DirtDrawer::DirtDrawer(float seed)
           {.pipelineLayout     = *m_pipelineLayout,
            .topology           = vk::PrimitiveTopology::ePatchList,
            .patchControlPoints = 1,
+           .cullMode           = vk::CullModeFlagBits::eBack,
            .enableDepth        = true,
            .enableBlend        = false},
           {.vert = dirt_vert, .tesc = dirt_tesc, .tese = dirt_tese, .frag = dirt_frag}

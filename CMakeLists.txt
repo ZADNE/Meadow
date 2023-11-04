@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 project(Meadow)
 
-#RealWorld Game
+#Meadow
 add_executable_with_shaders(Meadow)
 target_include_directories(Meadow PRIVATE src)
 set_target_properties(Meadow PROPERTIES
@@ -9,10 +9,10 @@ set_target_properties(Meadow PROPERTIES
     REALSHADERS_CXX_NAMESPACE "md"
 )
 target_link_libraries(Meadow PUBLIC RealEngine)
-add_custom_command(TARGET Meadow POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_SOURCE_DIR}/data/ .
-)
+#add_custom_command(TARGET Meadow POST_BUILD
+#    COMMAND ${CMAKE_COMMAND} -E copy_directory
+#    ${CMAKE_CURRENT_SOURCE_DIR}/data/ .
+#)
 
 #Doxygen documentation
 find_package(Doxygen)

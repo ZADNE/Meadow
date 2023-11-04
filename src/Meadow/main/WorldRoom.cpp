@@ -27,6 +27,7 @@ WorldRoom::WorldRoom(size_t roomName)
               .stepsPerSecond       = 50,
               .framesPerSecondLimit = k_frameRateLimit,
               .usingImGui           = true}} {
+    engine().setWindowTitle("Meadow");
 }
 
 void WorldRoom::sessionStart(const re::RoomTransitionArguments& args) {
@@ -43,15 +44,17 @@ void WorldRoom::step() {
     m_camera.rotate(glm::vec3{
         glm::vec2{-rel.y, rel.x} * 0.008f, static_cast<float>(rollDir) * 0.01f});
 
-    glm::vec3 leftUpForward{0.0f};
+    glm::vec3 rightUpBack{0.0f};
 
-    leftUpForward.x += (engine().isKeyDown(re::Key::A) > 0) -
-                       (engine().isKeyDown(re::Key::D) > 0);
-    leftUpForward.z += (engine().isKeyDown(re::Key::W) > 0) -
-                       (engine().isKeyDown(re::Key::S) > 0);
-    leftUpForward *= 0.125f;
+    rightUpBack.x += (engine().isKeyDown(re::Key::D) > 0) -
+                     (engine().isKeyDown(re::Key::A) > 0);
+    rightUpBack.y += (engine().isKeyDown(re::Key::T) > 0) -
+                     (engine().isKeyDown(re::Key::G) > 0);
+    rightUpBack.z += (engine().isKeyDown(re::Key::S) > 0) -
+                     (engine().isKeyDown(re::Key::W) > 0);
+    rightUpBack *= 0.125f;
 
-    m_camera.move(leftUpForward);
+    m_camera.move(rightUpBack);
 
     glm::vec2 windowDims = engine().windowDims();
     glm::mat4 projMat    = glm::perspective(

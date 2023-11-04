@@ -17,9 +17,11 @@ float height(vec2 pos, float seed){
 
     // Fractal-noise height
     float noiseHeight = 0.0;
-    for (float s = 0.125; s <= 8.0; s *= 2.0){
+    float s = 0.03125;
+    for (int i = 0; i < 6; ++i){
         noiseHeight -= snoise(pos, seed) * s;
         pos *= 0.5;
+        s *= 2.0;
     }
 
     return valleyHeight + noiseHeight;
