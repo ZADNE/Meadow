@@ -6,4 +6,5 @@
     dirtTexture.glsl            
     GrassPC.glsl                
     height.glsl                 
+    stalk.vert                  stalk.frag
 )

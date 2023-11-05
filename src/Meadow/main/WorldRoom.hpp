@@ -6,7 +6,7 @@
 #include <RealEngine/graphics/cameras/View2D.hpp>
 #include <RealEngine/rooms/Room.hpp>
 
-#include <Meadow/grass/DirtDrawer.hpp>
+#include <Meadow/grass/GrassDrawer.hpp>
 
 namespace md {
 
@@ -21,9 +21,9 @@ public:
 
 private:
     re::FlyingCamera3D m_camera{{0.0, -2.0, 0.0}, {0.0f, 0.0f, glm::pi<float>()}};
-    glm::mat4  m_projViewMat{};
-    DirtDrawer m_dirtDrawer{673.0f};
-    bool       m_hiddenCursor = true;
+    glm::mat4   m_projViewMat{};
+    GrassDrawer m_grassDrawer{673.0f};
+    bool        m_hiddenCursor = true;
 };
 
 } // namespace md

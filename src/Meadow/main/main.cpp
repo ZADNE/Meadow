@@ -11,12 +11,15 @@ using A = vk::AccessFlagBits;
 
 int main(int argc, char* argv[]) {
     // Vulkan features to enable
-    auto chain = vk::StructureChain{vk::PhysicalDeviceFeatures2{
-        vk::PhysicalDeviceFeatures{}
-            .setTessellationShader(true)
-            .setGeometryShader(true)
-            .setFillModeNonSolid(true)
-            .setFillModeNonSolid(true)}};
+    auto chain = vk::StructureChain{
+        vk::PhysicalDeviceFeatures2{
+            vk::PhysicalDeviceFeatures{}
+                .setTessellationShader(true)
+                .setGeometryShader(true)
+                .setFillModeNonSolid(true)
+                .setFillModeNonSolid(true)
+                .setMultiDrawIndirect(true)},
+        vk::PhysicalDeviceVulkan11Features{}.setShaderDrawParameters(true)};
 
     // Buffers to be used as render targets
     auto additionalBuffers = std::to_array<re::VulkanInitInfo::BufferDescr>(

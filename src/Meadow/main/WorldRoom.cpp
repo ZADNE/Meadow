@@ -76,7 +76,7 @@ void WorldRoom::step() {
 void WorldRoom::render(
     const vk::CommandBuffer& commandBuffer, double interpolationFactor
 ) {
-    m_dirtDrawer.render(
+    m_grassDrawer.render(
         commandBuffer, interpolationFactor, m_projViewMat, m_camera.pos()
     );
 
