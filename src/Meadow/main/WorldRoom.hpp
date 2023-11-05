@@ -23,6 +23,7 @@ private:
     re::FlyingCamera3D m_camera{{0.0, -2.0, 0.0}, {0.0f, 0.0f, glm::pi<float>()}};
     glm::mat4  m_projViewMat{};
     DirtDrawer m_dirtDrawer{673.0f};
+    bool       m_hiddenCursor = true;
 };
 
 } // namespace md

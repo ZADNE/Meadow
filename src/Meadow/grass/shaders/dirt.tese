@@ -9,15 +9,13 @@ layout (location = 0) out vec3 o_pos;
 layout (location = 1) out vec3 o_normal;
 
 layout (quads, fractional_even_spacing) in;
-layout (location = 0) in vec2 i_pos[];
+layout (location = 0) in vec2 i_pos2D[];
 
 const float k_derOffset = 0.0625;
 
 void main() {
     // Calculate position within the patch
-    vec2 pos01 = mix(i_pos[0], i_pos[1], gl_TessCoord.x);
-    vec2 pos23 = mix(i_pos[2], i_pos[3], gl_TessCoord.x);
-    vec2 pos = mix(pos01, pos23, gl_TessCoord.y);
+    vec2 pos = i_pos2D[0] + gl_TessCoord.xy * 8.0;
 
     // Calculate height
     float h = height(pos, p_seed);

@@ -6,6 +6,8 @@
 
 #include <Meadow/main/WorldRoom.hpp>
 
+using namespace ImGui;
+
 namespace md {
 
 #ifdef _DEBUG
@@ -31,36 +33,44 @@ WorldRoom::WorldRoom(size_t roomName)
 }
 
 void WorldRoom::sessionStart(const re::RoomTransitionArguments& args) {
-    engine().setRelativeCursorMode(true);
+    engine().setRelativeCursorMode(m_hiddenCursor);
 }
 
 void WorldRoom::sessionEnd() {
 }
 
 void WorldRoom::step() {
-    const auto& rel     = engine().cursorRel();
-    int         rollDir = (engine().isKeyDown(re::Key::E) > 0) -
-                  (engine().isKeyDown(re::Key::Q) > 0);
-    m_camera.rotate(glm::vec3{
-        glm::vec2{-rel.y, rel.x} * 0.008f, static_cast<float>(rollDir) * 0.01f});
+    if (m_hiddenCursor) { // If not in menu
+        const auto& rel     = engine().cursorRel();
+        int         rollDir = (engine().isKeyDown(re::Key::E) > 0) -
+                      (engine().isKeyDown(re::Key::Q) > 0);
+        m_camera.rotate(glm::vec3{
+            glm::vec2{-rel.y, rel.x} * 0.008f,
+            static_cast<float>(rollDir) * 0.01f});
 
-    glm::vec3 rightUpBack{0.0f};
+        glm::vec3 rightUpBack{0.0f};
 
-    rightUpBack.x += (engine().isKeyDown(re::Key::D) > 0) -
-                     (engine().isKeyDown(re::Key::A) > 0);
-    rightUpBack.y += (engine().isKeyDown(re::Key::T) > 0) -
-                     (engine().isKeyDown(re::Key::G) > 0);
-    rightUpBack.z += (engine().isKeyDown(re::Key::S) > 0) -
-                     (engine().isKeyDown(re::Key::W) > 0);
-    rightUpBack *= 0.125f;
+        rightUpBack.x += (engine().isKeyDown(re::Key::D) > 0) -
+                         (engine().isKeyDown(re::Key::A) > 0);
+        rightUpBack.y += (engine().isKeyDown(re::Key::T) > 0) -
+                         (engine().isKeyDown(re::Key::G) > 0);
+        rightUpBack.z += (engine().isKeyDown(re::Key::S) > 0) -
+                         (engine().isKeyDown(re::Key::W) > 0);
+        rightUpBack *= 0.125f;
 
-    m_camera.move(rightUpBack);
+        m_camera.move(rightUpBack);
 
-    glm::vec2 windowDims = engine().windowDims();
-    glm::mat4 projMat    = glm::perspective(
-        glm::radians(45.0f), windowDims.x / windowDims.y, 0.1f, 1000.0f
-    );
-    m_projViewMat = projMat * m_camera.viewMat();
+        glm::vec2 windowDims = engine().windowDims();
+        glm::mat4 projMat    = glm::perspective(
+            glm::radians(45.0f), windowDims.x / windowDims.y, 0.1f, 1000.0f
+        );
+        m_projViewMat = projMat * m_camera.viewMat();
+    }
+
+    // Switch menu on/off
+    if (engine().wasKeyPressed(re::Key::LMB)) {
+        engine().setRelativeCursorMode(m_hiddenCursor = !m_hiddenCursor);
+    }
 }
 
 void WorldRoom::render(
@@ -69,6 +79,22 @@ void WorldRoom::render(
     m_dirtDrawer.render(
         commandBuffer, interpolationFactor, m_projViewMat, m_camera.pos()
     );
+
+    if (Begin("Meadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+        if (BeginTabBar("##TabBar")) {
+            if (BeginTabItem("Performance")) {
+                using namespace std::chrono;
+                ImGui::Text(
+                    "FPS: %u\nMax FT: %i us",
+                    engine().framesPerSecond(),
+                    (int)duration_cast<microseconds>(engine().maxFrameTime()).count()
+                );
+                EndTabItem();
+            }
+            EndTabBar();
+        }
+    }
+    End();
 }
 
 } // namespace md
