@@ -76,6 +76,9 @@ void WorldRoom::step() {
 void WorldRoom::render(
     const vk::CommandBuffer& commandBuffer, double interpolationFactor
 ) {
+
+    engine().mainRenderPassBegin();
+
     m_grassDrawer.render(
         commandBuffer, interpolationFactor, m_projViewMat, m_camera.pos()
     );
@@ -95,6 +98,9 @@ void WorldRoom::render(
         }
     }
     End();
+
+    engine().mainRenderPassDrawImGui();
+    engine().mainRenderPassEnd();
 }
 
 } // namespace md

@@ -28,10 +28,9 @@ int main(int argc, char* argv[]) {
           vk::ImageAspectFlagBits::eDepth}}
     );
 
-    // Default renderpass to be used
+    // Main renderpass to be used
     auto attachmentDescriptions = std::to_array<vk::AttachmentDescription2>(
         {vk::AttachmentDescription2{
-             // Output color attachment
              {},
              re::k_surfaceFormat.format,
              vk::SampleCountFlagBits::e1,
@@ -81,7 +80,7 @@ int main(int argc, char* argv[]) {
     // Initialize RealEngine
     re::MainProgram::initialize(
         {.deviceCreateInfoChain = &chain.get<>(),
-         .defaultRenderPass     = &renderPassCreateInfo,
+         .mainRenderPass        = &renderPassCreateInfo,
          .additionalBuffers     = additionalBuffers}
     );
 

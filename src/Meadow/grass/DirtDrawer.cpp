@@ -13,7 +13,7 @@ constexpr glm::ivec2 k_dirtTileCount{128, 128};
 } // namespace
 
 DirtDrawer::DirtDrawer(vk::PipelineLayout pipelineLayout)
-    : m_pipeline(
+    : m_drawDirtPl(
           {.pipelineLayout     = pipelineLayout,
            .topology           = vk::PrimitiveTopology::ePatchList,
            .patchControlPoints = 1,
@@ -22,7 +22,7 @@ DirtDrawer::DirtDrawer(vk::PipelineLayout pipelineLayout)
            .enableBlend        = false},
           {.vert = dirt_vert, .tesc = dirt_tesc, .tese = dirt_tese, .frag = dirt_frag}
       )
-    , m_debugPipeline(
+    , m_debugPl(
           {.pipelineLayout     = pipelineLayout,
            .topology           = vk::PrimitiveTopology::ePatchList,
            .patchControlPoints = 1,
@@ -37,9 +37,9 @@ DirtDrawer::DirtDrawer(vk::PipelineLayout pipelineLayout)
 }
 
 void DirtDrawer::render(const vk::CommandBuffer& commandBuffer) {
-    commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_pipeline);
+    commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_drawDirtPl);
     commandBuffer.draw(k_dirtTileCount.x * k_dirtTileCount.y, 1, 0, 0);
-    commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_debugPipeline);
+    commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_debugPl);
     commandBuffer.draw(k_dirtTileCount.x * k_dirtTileCount.y, 1, 0, 0);
 }
 

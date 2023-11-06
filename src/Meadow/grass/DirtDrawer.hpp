@@ -16,8 +16,8 @@ public:
     void render(const vk::CommandBuffer& commandBuffer);
 
 private:
-    re::Pipeline m_pipeline;
-    re::Pipeline m_debugPipeline;
+    re::Pipeline m_drawDirtPl;
+    re::Pipeline m_debugPl;
 };
 
 } // namespace md

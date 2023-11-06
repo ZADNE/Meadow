@@ -17,8 +17,9 @@ public:
     void render(const vk::CommandBuffer& commandBuffer);
 
 private:
-    re::Pipeline m_pipeline;
-    re::Buffer   m_indirectBuffer;
+    re::Pipeline m_prepareStalksPl;
+    re::Pipeline m_drawStalksPl;
+    re::Buffer   m_indirectBuf;
 };
 
 } // namespace md

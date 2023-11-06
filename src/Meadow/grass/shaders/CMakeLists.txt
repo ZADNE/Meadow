@@ -7,4 +7,5 @@
     GrassPC.glsl                
     height.glsl                 
     stalk.vert                  stalk.frag
+    stalk.comp                  
 )
