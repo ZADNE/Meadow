@@ -18,15 +18,12 @@ constexpr glm::ivec2 k_stalkTileCount{128, 128};
 } // namespace
 
 StalkDrawer::StalkDrawer(vk::PipelineLayout pipelineLayout)
-    : m_prepareStalksPl(
-          {.pipelineLayout = pipelineLayout},
-          {.comp = stalk_comp}
-      )
-    ,m_drawStalksPl(
-          {.pipelineLayout = pipelineLayout,
-           .topology       = vk::PrimitiveTopology::eTriangleStrip,
+    : m_prepareStalksPl({.pipelineLayout = pipelineLayout}, {.comp = stalk_comp})
+    , m_drawStalksPl(
+          {.topology       = vk::PrimitiveTopology::eTriangleStrip,
            .enableDepth    = true,
-           .enableBlend    = false},
+           .enableBlend    = false,
+           .pipelineLayout = pipelineLayout},
           {.vert = stalk_vert, .frag = stalk_frag}
       )
     , m_indirectBuf({re::BufferCreateInfo{
@@ -37,8 +34,8 @@ StalkDrawer::StalkDrawer(vk::PipelineLayout pipelineLayout)
 }
 
 void StalkDrawer::render(const vk::CommandBuffer& commandBuffer) {
-    //commandBuffer.bindPipeline(vk::PipelineBindPoint::eCompute, *m_prepareStalksPl);
-    //commandBuffer.dispatch(1, 1, 1);
+    // commandBuffer.bindPipeline(vk::PipelineBindPoint::eCompute,
+    // *m_prepareStalksPl); commandBuffer.dispatch(1, 1, 1);
     commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_drawStalksPl);
     commandBuffer.drawIndirect(
         *m_indirectBuf,

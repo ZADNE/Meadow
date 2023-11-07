@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 
     // Buffers to be used as render targets
     auto additionalBuffers = std::to_array<re::VulkanInitInfo::BufferDescr>(
-        {{vk::Format::eD32Sfloat,
+        {{vk::Format::eD24UnormS8Uint,
           vk::ImageUsageFlagBits::eDepthStencilAttachment,
           vk::ImageAspectFlagBits::eDepth}}
     );
@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
          },
          vk::AttachmentDescription2{
              {},
-             vk::Format::eD32Sfloat,
+             vk::Format::eD24UnormS8Uint,
              vk::SampleCountFlagBits::e1,
              vk::AttachmentLoadOp::eClear,                   // Depth
              vk::AttachmentStoreOp::eDontCare,               // Depth

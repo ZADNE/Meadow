@@ -14,20 +14,20 @@ constexpr glm::ivec2 k_dirtTileCount{128, 128};
 
 DirtDrawer::DirtDrawer(vk::PipelineLayout pipelineLayout)
     : m_drawDirtPl(
-          {.pipelineLayout     = pipelineLayout,
-           .topology           = vk::PrimitiveTopology::ePatchList,
+          {.topology           = vk::PrimitiveTopology::ePatchList,
            .patchControlPoints = 1,
            .cullMode           = vk::CullModeFlagBits::eBack,
            .enableDepth        = true,
-           .enableBlend        = false},
+           .enableBlend        = false,
+           .pipelineLayout     = pipelineLayout},
           {.vert = dirt_vert, .tesc = dirt_tesc, .tese = dirt_tese, .frag = dirt_frag}
       )
     , m_debugPl(
-          {.pipelineLayout     = pipelineLayout,
-           .topology           = vk::PrimitiveTopology::ePatchList,
+          {.topology           = vk::PrimitiveTopology::ePatchList,
            .patchControlPoints = 1,
            .enableDepth        = true,
-           .enableBlend        = false},
+           .enableBlend        = false,
+           .pipelineLayout     = pipelineLayout},
           {.vert = dirt_vert,
            .tesc = dirt_tesc,
            .tese = debugDirt_tese,
