@@ -3,14 +3,11 @@
  */
 #include <glm/vec2.hpp>
 
+#include <Meadow/constants/map.hpp>
 #include <Meadow/grass/DirtDrawer.hpp>
 #include <Meadow/grass/shaders/AllShaders.hpp>
 
 namespace md {
-
-namespace {
-constexpr glm::ivec2 k_dirtTileCount{128, 128};
-} // namespace
 
 DirtDrawer::DirtDrawer(vk::PipelineLayout pipelineLayout)
     : m_drawDirtPl(
@@ -36,11 +33,11 @@ DirtDrawer::DirtDrawer(vk::PipelineLayout pipelineLayout)
       ) {
 }
 
-void DirtDrawer::render(const vk::CommandBuffer& commandBuffer) {
-    commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_drawDirtPl);
-    commandBuffer.draw(k_dirtTileCount.x * k_dirtTileCount.y, 1, 0, 0);
-    commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_debugPl);
-    commandBuffer.draw(k_dirtTileCount.x * k_dirtTileCount.y, 1, 0, 0);
+void DirtDrawer::render(const vk::CommandBuffer& cmbBuf) {
+    cmbBuf.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_drawDirtPl);
+    cmbBuf.draw(k_mapGridSize.x * k_mapGridSize.y, 1, 0, 0);
+    /*cmbBuf.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_debugPl);
+    cmbBuf.draw(k_mapGridSize.x * k_mapGridSize.y, 1, 0, 0);*/
 }
 
 } // namespace md

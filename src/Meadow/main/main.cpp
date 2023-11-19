@@ -67,12 +67,15 @@ int main(int argc, char* argv[]) {
         {},                  // Resolve attachments
         &depthAttachmentRef};
     vk::SubpassDependency2 subpassDependency{
-        vk::SubpassExternal,                          // Src subpass
-        0u,                                           // Dst subpass
-        eColorAttachmentOutput | eEarlyFragmentTests, // Src stage mask
-        eColorAttachmentOutput | eEarlyFragmentTests, // Dst stage mask
-        vk::AccessFlags{},                            // Src access mask
-        A::eColorAttachmentWrite | A::eDepthStencilAttachmentWrite // Dst access mask
+        vk::SubpassExternal, // Src subpass
+        0u,                  // Dst subpass
+        eColorAttachmentOutput | eEarlyFragmentTests |
+            eComputeShader, // Src stage mask
+        eColorAttachmentOutput | eEarlyFragmentTests | eDrawIndirect |
+            eVertexInput, // Dst stage mask
+        A::eShaderWrite,  // Src access mask
+        A::eColorAttachmentWrite | A::eDepthStencilAttachmentWrite |
+            A::eIndirectCommandRead | A::eVertexAttributeRead // Dst access mask
     };
     vk::RenderPassCreateInfo2 renderPassCreateInfo{
         {}, attachmentDescriptions, subpassDescription, subpassDependency};

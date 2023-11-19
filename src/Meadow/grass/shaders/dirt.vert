@@ -2,8 +2,10 @@
  *  @author     Dubsky Tomas
  */
 #version 460
+#include <Meadow/constants/map.glsl>
+
 layout (location = 0) out vec2 o_center;
 
 void main() {
-    o_center = vec2((gl_VertexIndex & 127) - 64, (gl_VertexIndex >> 7) - 64) * 8.0 + 4.0;
+    o_center = (vec2(indexToGridPos(gl_VertexIndex)) + 0.5) * k_mapTileSize;
 }

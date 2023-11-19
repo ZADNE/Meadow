@@ -1,47 +1,66 @@
 ﻿/*!
  *  @author    Dubsky Tomas
  */
-#include <glm/vec2.hpp>
-
 #include <Meadow/grass/StalkDrawer.hpp>
+#include <Meadow/grass/StalkSB.hpp>
 #include <Meadow/grass/shaders/AllShaders.hpp>
 
 using enum vk::BufferUsageFlagBits;
 
+using D = vk::DescriptorType;
+
 namespace md {
 
 namespace {
-constexpr auto k_test = std::to_array<vk::DrawIndirectCommand>(
-    {vk::DrawIndirectCommand{3, 1, 0, 0}, vk::DrawIndirectCommand{3, 1, 0, 0}}
+constexpr std::array k_bindings = std::to_array<vk::VertexInputBindingDescription>({{
+    0u,                            // Binding index
+    sizeof(Stalk),                 // Stride
+    vk::VertexInputRate::eInstance // Input rate
+}});
+constexpr std::array k_attributes = std::to_array<vk::VertexInputAttributeDescription>(
+    {{
+         0u,                              // Location
+         0u,                              // Binding index
+         vk::Format::eR32G32B32A32Sfloat, // Format
+         offsetof(Stalk, posSize)         // Relative offset
+     },
+     {
+         1u,                        // Location
+         0u,                        // Binding index
+         vk::Format::eR32G32Sfloat, // Format
+         offsetof(Stalk, facing)    // Relative offset
+     }}
 );
-constexpr glm::ivec2 k_stalkTileCount{128, 128};
+vk::PipelineVertexInputStateCreateInfo k_vertexInput{{}, k_bindings, k_attributes};
 } // namespace
 
-StalkDrawer::StalkDrawer(vk::PipelineLayout pipelineLayout)
-    : m_prepareStalksPl({.pipelineLayout = pipelineLayout}, {.comp = stalk_comp})
+StalkDrawer::StalkDrawer(vk::PipelineLayout pipelineLayout, re::DescriptorSet& descriptorSet)
+    : m_prepareStalksPl({.pipelineLayout = pipelineLayout}, {.comp = prepareStalks_comp})
     , m_drawStalksPl(
-          {.topology       = vk::PrimitiveTopology::eTriangleStrip,
+          {.vertexInput    = &k_vertexInput,
+           .topology       = vk::PrimitiveTopology::eTriangleStrip,
            .enableDepth    = true,
            .enableBlend    = false,
            .pipelineLayout = pipelineLayout},
-          {.vert = stalk_vert, .frag = stalk_frag}
+          {.vert = drawStalks_vert, .frag = drawStalks_frag}
       )
-    , m_indirectBuf({re::BufferCreateInfo{
+    , m_stalkBuf({re::BufferCreateInfo{
           .memoryUsage = vma::MemoryUsage::eAutoPreferDevice,
-          .sizeInBytes = k_stalkTileCount.x * k_stalkTileCount.y *
-                         sizeof(vk::DrawIndirectCommand),
-          .usage = eStorageBuffer | eIndirectBuffer}}) {
+          .sizeInBytes = sizeof(StalkSB) + sizeof(Stalk) * 128 * 128,
+          .usage       = eIndirectBuffer | eVertexBuffer | eStorageBuffer}}) {
+    descriptorSet.write(D::eStorageBuffer, 0, 0, m_stalkBuf, 0ull, vk::WholeSize);
 }
 
-void StalkDrawer::render(const vk::CommandBuffer& commandBuffer) {
-    // commandBuffer.bindPipeline(vk::PipelineBindPoint::eCompute,
-    // *m_prepareStalksPl); commandBuffer.dispatch(1, 1, 1);
-    commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_drawStalksPl);
-    commandBuffer.drawIndirect(
-        *m_indirectBuf,
-        0,
-        k_stalkTileCount.x * k_stalkTileCount.y,
-        sizeof(vk::DrawIndirectCommand)
+void StalkDrawer::prepareToRender(const vk::CommandBuffer& cmbBuf) {
+    cmbBuf.bindPipeline(vk::PipelineBindPoint::eCompute, *m_prepareStalksPl);
+    cmbBuf.dispatch(k_mapGridSize.x, k_mapGridSize.y, 1);
+}
+
+void StalkDrawer::render(const vk::CommandBuffer& cmbBuf) {
+    cmbBuf.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_drawStalksPl);
+    cmbBuf.bindVertexBuffers(0u, *m_stalkBuf, offsetof(StalkSB, stalks));
+    cmbBuf.drawIndirect(
+        *m_stalkBuf, offsetof(StalkSB, command), 1, sizeof(vk::DrawIndirectCommand)
     );
 }
 

@@ -13,7 +13,7 @@ class DirtDrawer {
 public:
     explicit DirtDrawer(vk::PipelineLayout pipelineLayout);
 
-    void render(const vk::CommandBuffer& commandBuffer);
+    void render(const vk::CommandBuffer& cmbBuf);
 
 private:
     re::Pipeline m_drawDirtPl;

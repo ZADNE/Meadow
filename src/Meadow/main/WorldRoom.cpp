@@ -56,7 +56,9 @@ void WorldRoom::step() {
                          (engine().isKeyDown(re::Key::G) > 0);
         rightUpBack.z += (engine().isKeyDown(re::Key::S) > 0) -
                          (engine().isKeyDown(re::Key::W) > 0);
-        rightUpBack *= 0.125f;
+        float length = glm::length(rightUpBack);
+        rightUpBack  = length > 0.0 ? rightUpBack / length : glm::vec3{0.0f};
+        rightUpBack *= engine().isKeyDown(re::Key::LShift) ? 1.0f : 0.125f;
 
         m_camera.move(rightUpBack);
 
@@ -73,15 +75,14 @@ void WorldRoom::step() {
     }
 }
 
-void WorldRoom::render(
-    const vk::CommandBuffer& commandBuffer, double interpolationFactor
-) {
+void WorldRoom::render(const vk::CommandBuffer& cmbBuf, double interpolationFactor) {
+    m_grassDrawer.prepareToRender(
+        cmbBuf, interpolationFactor, m_projViewMat, m_camera.pos()
+    );
 
     engine().mainRenderPassBegin();
 
-    m_grassDrawer.render(
-        commandBuffer, interpolationFactor, m_projViewMat, m_camera.pos()
-    );
+    m_grassDrawer.render(cmbBuf);
 
     if (Begin("Meadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
         if (BeginTabBar("##TabBar")) {

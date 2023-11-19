@@ -3,6 +3,7 @@
  */
 #pragma once
 #include <RealEngine/graphics/buffers/Buffer.hpp>
+#include <RealEngine/graphics/descriptors/DescriptorSet.hpp>
 #include <RealEngine/graphics/pipelines/Pipeline.hpp>
 
 namespace md {
@@ -12,14 +13,16 @@ namespace md {
  */
 class StalkDrawer {
 public:
-    explicit StalkDrawer(vk::PipelineLayout pipelineLayout);
+    StalkDrawer(vk::PipelineLayout pipelineLayout, re::DescriptorSet& descriptorSet);
 
-    void render(const vk::CommandBuffer& commandBuffer);
+    void prepareToRender(const vk::CommandBuffer& cmbBuf);
+
+    void render(const vk::CommandBuffer& cmbBuf);
 
 private:
     re::Pipeline m_prepareStalksPl;
     re::Pipeline m_drawStalksPl;
-    re::Buffer   m_indirectBuf;
+    re::Buffer   m_stalkBuf;
 };
 
 } // namespace md

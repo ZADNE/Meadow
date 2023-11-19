@@ -1,0 +1,28 @@
+/*!
+ *  @author     Dubsky Tomas
+ */
+#version 460
+#include <Meadow/grass/shaders/height.glsl>
+#include <Meadow/grass/shaders/GrassPC.glsl>
+const uint StalkSB_BINDING = 0;
+#include <Meadow/grass/shaders/StalkSB.glsl>
+
+layout (local_size_x = 16,
+        local_size_y = 16,
+        local_size_z = 1
+) in;
+
+void main() {
+    const uint workGroupIndex = gl_WorkGroupID.y * k_mapGridSize.x + gl_WorkGroupID.x;
+
+    if (gl_LocalInvocationIndex == 0){
+        vec2 pos2D = (vec2(gl_WorkGroupID.xy) - k_mapGridHalfSize) * k_mapTileSize;
+        float h = height(pos2D, p_seed);
+        vec3 pos = vec3(pos2D.x, h, pos2D.y);
+        b_stalk.stalks[workGroupIndex] = Stalk(vec4(pos, 1.0), vec2(0), vec2(0));
+    }
+
+    if (gl_GlobalInvocationID.x == 0 && gl_GlobalInvocationID.y == 0){
+        b_stalk.command = IndirectCommand(13, 128*128, 0, 0);
+    }
+}
