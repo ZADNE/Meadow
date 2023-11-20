@@ -29,6 +29,6 @@ void main() {
     vec2 offset = k_stalkOffsets[gl_VertexIndex >> 1] * sizeScale;
     offset.x *= float(gl_VertexIndex & 1) * 2.0 - 1.0;
     pos.xy += offset;
-    gl_Position = p_projViewMat * vec4(pos, 1.0);
+    gl_Position = p_grass.projViewMat * vec4(pos, 1.0);
     o_color = vec4(0.0, 1.0, 0.0, 1.0);
 }

@@ -33,11 +33,11 @@ DirtDrawer::DirtDrawer(vk::PipelineLayout pipelineLayout)
       ) {
 }
 
-void DirtDrawer::render(const vk::CommandBuffer& cmbBuf) {
-    cmbBuf.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_drawDirtPl);
-    cmbBuf.draw(k_mapGridSize.x * k_mapGridSize.y, 1, 0, 0);
-    /*cmbBuf.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_debugPl);
-    cmbBuf.draw(k_mapGridSize.x * k_mapGridSize.y, 1, 0, 0);*/
+void DirtDrawer::render(const vk::CommandBuffer& cmdBuf) {
+    cmdBuf.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_drawDirtPl);
+    cmdBuf.draw(k_mapGridSize.x * k_mapGridSize.y, 1, 0, 0);
+    /*cmdBuf.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_debugPl);
+    cmdBuf.draw(k_mapGridSize.x * k_mapGridSize.y, 1, 0, 0);*/
 }
 
 } // namespace md

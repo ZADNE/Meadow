@@ -17,7 +17,7 @@ public:
     void sessionStart(const re::RoomTransitionArguments& args) override;
     void sessionEnd() override;
     void step() override;
-    void render(const vk::CommandBuffer& cmbBuf, double interpolationFactor) override;
+    void render(const vk::CommandBuffer& cmdBuf, double interpolationFactor) override;
 
 private:
     re::FlyingCamera3D m_camera{{0.0, -2.0, 0.0}, {0.0f, 0.0f, glm::pi<float>()}};

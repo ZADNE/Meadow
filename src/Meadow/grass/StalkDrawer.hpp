@@ -15,13 +15,16 @@ class StalkDrawer {
 public:
     StalkDrawer(vk::PipelineLayout pipelineLayout, re::DescriptorSet& descriptorSet);
 
-    void prepareToRender(const vk::CommandBuffer& cmbBuf);
+    void prerenderCompute(const vk::CommandBuffer& cmdBuf);
 
-    void render(const vk::CommandBuffer& cmbBuf);
+    void render(const vk::CommandBuffer& cmdBuf);
+
+    void postrenderCompute(const vk::CommandBuffer& cmdBuf);
 
 private:
     re::Pipeline m_prepareStalksPl;
     re::Pipeline m_drawStalksPl;
+    re::Pipeline m_resetStalksPl;
     re::Buffer   m_stalkBuf;
 };
 

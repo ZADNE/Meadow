@@ -31,7 +31,9 @@ constexpr std::array k_attributes = std::to_array<vk::VertexInputAttributeDescri
          offsetof(Stalk, facing)    // Relative offset
      }}
 );
-vk::PipelineVertexInputStateCreateInfo k_vertexInput{{}, k_bindings, k_attributes};
+const vk::PipelineVertexInputStateCreateInfo k_vertexInput{
+    {}, k_bindings, k_attributes};
+constexpr vk::DrawIndirectCommand k_stalkIndirectCommandTemplate{13, 0, 0, 0};
 } // namespace
 
 StalkDrawer::StalkDrawer(vk::PipelineLayout pipelineLayout, re::DescriptorSet& descriptorSet)
@@ -44,24 +46,32 @@ StalkDrawer::StalkDrawer(vk::PipelineLayout pipelineLayout, re::DescriptorSet& d
            .pipelineLayout = pipelineLayout},
           {.vert = drawStalks_vert, .frag = drawStalks_frag}
       )
+    , m_resetStalksPl({.pipelineLayout = pipelineLayout}, {.comp = resetStalks_comp})
     , m_stalkBuf({re::BufferCreateInfo{
           .memoryUsage = vma::MemoryUsage::eAutoPreferDevice,
           .sizeInBytes = sizeof(StalkSB) + sizeof(Stalk) * 128 * 128,
-          .usage       = eIndirectBuffer | eVertexBuffer | eStorageBuffer}}) {
+          .usage       = eIndirectBuffer | eVertexBuffer | eStorageBuffer,
+          .initData    = re::objectToByteSpan(k_stalkIndirectCommandTemplate),
+          .initDataDstOffset = offsetof(StalkSB, command)}}) {
     descriptorSet.write(D::eStorageBuffer, 0, 0, m_stalkBuf, 0ull, vk::WholeSize);
 }
 
-void StalkDrawer::prepareToRender(const vk::CommandBuffer& cmbBuf) {
-    cmbBuf.bindPipeline(vk::PipelineBindPoint::eCompute, *m_prepareStalksPl);
-    cmbBuf.dispatch(k_mapGridSize.x, k_mapGridSize.y, 1);
+void StalkDrawer::prerenderCompute(const vk::CommandBuffer& cmdBuf) {
+    cmdBuf.bindPipeline(vk::PipelineBindPoint::eCompute, *m_prepareStalksPl);
+    cmdBuf.dispatch(k_mapGridSize.x, k_mapGridSize.y, 1);
 }
 
-void StalkDrawer::render(const vk::CommandBuffer& cmbBuf) {
-    cmbBuf.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_drawStalksPl);
-    cmbBuf.bindVertexBuffers(0u, *m_stalkBuf, offsetof(StalkSB, stalks));
-    cmbBuf.drawIndirect(
+void StalkDrawer::render(const vk::CommandBuffer& cmdBuf) {
+    cmdBuf.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_drawStalksPl);
+    cmdBuf.bindVertexBuffers(0u, *m_stalkBuf, offsetof(StalkSB, stalks));
+    cmdBuf.drawIndirect(
         *m_stalkBuf, offsetof(StalkSB, command), 1, sizeof(vk::DrawIndirectCommand)
     );
+}
+
+void StalkDrawer::postrenderCompute(const vk::CommandBuffer& cmdBuf) {
+    cmdBuf.bindPipeline(vk::PipelineBindPoint::eCompute, *m_resetStalksPl);
+    cmdBuf.dispatch(1, 1, 1);
 }
 
 } // namespace md

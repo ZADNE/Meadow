@@ -73,16 +73,18 @@ void WorldRoom::step() {
     if (engine().wasKeyPressed(re::Key::LMB)) {
         engine().setRelativeCursorMode(m_hiddenCursor = !m_hiddenCursor);
     }
+
+    m_grassDrawer.step();
 }
 
-void WorldRoom::render(const vk::CommandBuffer& cmbBuf, double interpolationFactor) {
-    m_grassDrawer.prepareToRender(
-        cmbBuf, interpolationFactor, m_projViewMat, m_camera.pos()
+void WorldRoom::render(const vk::CommandBuffer& cmdBuf, double interpolationFactor) {
+    m_grassDrawer.prerenderCompute(
+        cmdBuf, interpolationFactor, m_projViewMat, m_camera.pos()
     );
 
     engine().mainRenderPassBegin();
 
-    m_grassDrawer.render(cmbBuf);
+    m_grassDrawer.render(cmdBuf);
 
     if (Begin("Meadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
         if (BeginTabBar("##TabBar")) {
@@ -102,6 +104,8 @@ void WorldRoom::render(const vk::CommandBuffer& cmbBuf, double interpolationFact
 
     engine().mainRenderPassDrawImGui();
     engine().mainRenderPassEnd();
+
+    m_grassDrawer.postrenderCompute(cmdBuf);
 }
 
 } // namespace md
