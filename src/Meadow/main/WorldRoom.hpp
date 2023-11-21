@@ -19,9 +19,15 @@ public:
     void step() override;
     void render(const vk::CommandBuffer& cmdBuf, double interpolationFactor) override;
 
+    void windowResizedCallback(glm::ivec2 oldSize, glm::ivec2 newSize) override;
+
 private:
+    glm::mat4 assembleProjectionMatrix(glm::vec2 windowDims) const;
+
     re::FlyingCamera3D m_camera{{0.0, -2.0, 0.0}, {0.0f, 0.0f, glm::pi<float>()}};
-    glm::mat4   m_projViewMat{};
+    glm::mat4   m_projMat = assembleProjectionMatrix(engine().windowDims());
+    glm::vec3   m_rotation{};
+    glm::vec3   m_rightUpBack{};
     GrassDrawer m_grassDrawer{673.0f};
     bool        m_hiddenCursor = true;
 };

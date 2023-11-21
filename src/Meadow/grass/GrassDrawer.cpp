@@ -3,6 +3,7 @@
  */
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <Meadow/constants/time.hpp>
 #include <Meadow/grass/GrassDrawer.hpp>
 #include <Meadow/grass/shaders/AllShaders.hpp>
 
@@ -33,7 +34,7 @@ GrassDrawer::GrassDrawer(float seed)
 }
 
 void GrassDrawer::step() {
-    m_timeSec += 0.02;
+    m_timeSec += k_perStep;
 }
 
 void GrassDrawer::prerenderCompute(

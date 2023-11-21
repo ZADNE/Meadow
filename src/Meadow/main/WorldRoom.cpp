@@ -2,19 +2,15 @@
  *  @author    Dubsky Tomas
  */
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <Meadow/constants/time.hpp>
 #include <Meadow/main/WorldRoom.hpp>
 
 using namespace ImGui;
 
 namespace md {
-
-#ifdef _DEBUG
-constexpr unsigned int k_frameRateLimit = 300u;
-#else
-constexpr unsigned int k_frameRateLimit = re::Synchronizer::k_doNotLimitFramesPerSecond;
-#endif // _DEBUG
 
 constexpr auto k_clearValues = std::to_array<vk::ClearValue>(
     {vk::ClearColorValue{0.25411764705f, 0.7025490196f, 0.90470588235f, 1.0f},
@@ -26,7 +22,7 @@ WorldRoom::WorldRoom(size_t roomName)
           roomName,
           re::RoomDisplaySettings{
               .clearValues          = k_clearValues,
-              .stepsPerSecond       = 50,
+              .stepsPerSecond       = k_stepsPerSecond,
               .framesPerSecondLimit = k_frameRateLimit,
               .usingImGui           = true}} {
     engine().setWindowTitle("Meadow");
@@ -44,29 +40,23 @@ void WorldRoom::step() {
         const auto& rel     = engine().cursorRel();
         int         rollDir = (engine().isKeyDown(re::Key::E) > 0) -
                       (engine().isKeyDown(re::Key::Q) > 0);
-        m_camera.rotate(glm::vec3{
-            glm::vec2{-rel.y, rel.x} * 0.008f,
-            static_cast<float>(rollDir) * 0.01f});
+        m_rotation = glm::vec3{
+            glm::vec2{-rel.y, rel.x} * 0.003f, static_cast<float>(rollDir) * 0.01f};
+        m_camera.rotate(m_rotation);
 
-        glm::vec3 rightUpBack{0.0f};
+        m_rightUpBack = glm::vec3{0.0f};
 
-        rightUpBack.x += (engine().isKeyDown(re::Key::D) > 0) -
-                         (engine().isKeyDown(re::Key::A) > 0);
-        rightUpBack.y += (engine().isKeyDown(re::Key::T) > 0) -
-                         (engine().isKeyDown(re::Key::G) > 0);
-        rightUpBack.z += (engine().isKeyDown(re::Key::S) > 0) -
-                         (engine().isKeyDown(re::Key::W) > 0);
-        float length = glm::length(rightUpBack);
-        rightUpBack  = length > 0.0 ? rightUpBack / length : glm::vec3{0.0f};
-        rightUpBack *= engine().isKeyDown(re::Key::LShift) ? 1.0f : 0.125f;
+        m_rightUpBack.x += (engine().isKeyDown(re::Key::D) > 0) -
+                           (engine().isKeyDown(re::Key::A) > 0);
+        m_rightUpBack.y += (engine().isKeyDown(re::Key::T) > 0) -
+                           (engine().isKeyDown(re::Key::G) > 0);
+        m_rightUpBack.z += (engine().isKeyDown(re::Key::S) > 0) -
+                           (engine().isKeyDown(re::Key::W) > 0);
+        float length  = glm::length(m_rightUpBack);
+        m_rightUpBack = length > 0.0 ? m_rightUpBack / length : glm::vec3{0.0f};
+        m_rightUpBack *= engine().isKeyDown(re::Key::LShift) ? 0.25f : 0.03125f;
 
-        m_camera.move(rightUpBack);
-
-        glm::vec2 windowDims = engine().windowDims();
-        glm::mat4 projMat    = glm::perspective(
-            glm::radians(45.0f), windowDims.x / windowDims.y, 0.1f, 1000.0f
-        );
-        m_projViewMat = projMat * m_camera.viewMat();
+        m_camera.move(m_rightUpBack);
     }
 
     // Switch menu on/off
@@ -78,14 +68,24 @@ void WorldRoom::step() {
 }
 
 void WorldRoom::render(const vk::CommandBuffer& cmdBuf, double interpolationFactor) {
+    // Interpolate camera position
+    float     f = interpolationFactor;
+    glm::mat4 projViewMat =
+        m_projMat *
+        m_camera.calculateRelativeViewMat(m_rotation * f, m_rightUpBack * f);
+
+    // Prepare to render the world
     m_grassDrawer.prerenderCompute(
-        cmdBuf, interpolationFactor, m_projViewMat, m_camera.pos()
+        cmdBuf, interpolationFactor, projViewMat, m_camera.pos()
     );
 
+    // Begin main render pass
     engine().mainRenderPassBegin();
 
+    // Render the world
     m_grassDrawer.render(cmdBuf);
 
+    // Render UI
     if (Begin("Meadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
         if (BeginTabBar("##TabBar")) {
             if (BeginTabItem("Performance")) {
@@ -101,11 +101,23 @@ void WorldRoom::render(const vk::CommandBuffer& cmdBuf, double interpolationFact
         }
     }
     End();
-
     engine().mainRenderPassDrawImGui();
+
+    // End main render pass
     engine().mainRenderPassEnd();
 
+    // Cleanup compute work before next frame
     m_grassDrawer.postrenderCompute(cmdBuf);
+}
+
+void WorldRoom::windowResizedCallback(glm::ivec2 oldSize, glm::ivec2 newSize) {
+    m_projMat = assembleProjectionMatrix(newSize);
+}
+
+glm::mat4 WorldRoom::assembleProjectionMatrix(glm::vec2 windowDims) const {
+    return glm::perspective(
+        glm::radians(45.0f), windowDims.x / windowDims.y, 0.1f, 1000.0f
+    );
 }
 
 } // namespace md
