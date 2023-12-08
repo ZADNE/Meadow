@@ -46,7 +46,6 @@ StalkDrawer::StalkDrawer(vk::PipelineLayout pipelineLayout, re::DescriptorSet& d
            .pipelineLayout = pipelineLayout},
           {.vert = drawStalks_vert, .frag = drawStalks_frag}
       )
-    , m_resetStalksPl({.pipelineLayout = pipelineLayout}, {.comp = resetStalks_comp})
     , m_stalkBuf({re::BufferCreateInfo{
           .memoryUsage = vma::MemoryUsage::eAutoPreferDevice,
           .sizeInBytes = sizeof(StalkSB) + sizeof(Stalk) * 128 * 128,
@@ -70,8 +69,14 @@ void StalkDrawer::render(const vk::CommandBuffer& cmdBuf) {
 }
 
 void StalkDrawer::postrenderCompute(const vk::CommandBuffer& cmdBuf) {
-    cmdBuf.bindPipeline(vk::PipelineBindPoint::eCompute, *m_resetStalksPl);
-    cmdBuf.dispatch(1, 1, 1);
+    // Reset the number of stalks to zero in preparation for next frame
+    using Command = decltype(StalkSB::command);
+    cmdBuf.fillBuffer(
+        *m_stalkBuf,
+        offsetof(StalkSB, command) + offsetof(Command, instanceCount),
+        sizeof(Command::instanceCount),
+        0
+    );
 }
 
 } // namespace md

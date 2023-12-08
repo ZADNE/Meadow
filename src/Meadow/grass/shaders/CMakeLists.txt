@@ -8,6 +8,5 @@
     GrassPC.glsl                
     height.glsl                 
     prepareStalks.comp          
-    resetStalks.comp            
     StalkSB.glsl                
 )

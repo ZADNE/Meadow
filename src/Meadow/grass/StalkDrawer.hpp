@@ -24,7 +24,6 @@ public:
 private:
     re::Pipeline m_prepareStalksPl;
     re::Pipeline m_drawStalksPl;
-    re::Pipeline m_resetStalksPl;
     re::Buffer   m_stalkBuf;
 };
 
