@@ -19,7 +19,7 @@ DirtDrawer::DirtDrawer(vk::PipelineLayout pipelineLayout)
            .pipelineLayout     = pipelineLayout},
           {.vert = dirt_vert, .tesc = dirt_tesc, .tese = dirt_tese, .frag = dirt_frag}
       )
-    , m_debugPl(
+    , m_debugDirtPl(
           {.topology           = vk::PrimitiveTopology::ePatchList,
            .patchControlPoints = 1,
            .enableDepth        = true,
@@ -33,11 +33,14 @@ DirtDrawer::DirtDrawer(vk::PipelineLayout pipelineLayout)
       ) {
 }
 
-void DirtDrawer::render(const vk::CommandBuffer& cmdBuf) {
+void DirtDrawer::render(const vk::CommandBuffer& cmdBuf, bool showTessellation) {
     cmdBuf.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_drawDirtPl);
     cmdBuf.draw(k_mapGridSize.x * k_mapGridSize.y, 1, 0, 0);
-    /*cmdBuf.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_debugPl);
-    cmdBuf.draw(k_mapGridSize.x * k_mapGridSize.y, 1, 0, 0);*/
+
+    if (showTessellation) {
+        cmdBuf.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_debugDirtPl);
+        cmdBuf.draw(k_mapGridSize.x * k_mapGridSize.y, 1, 0, 0);
+    }
 }
 
 } // namespace md

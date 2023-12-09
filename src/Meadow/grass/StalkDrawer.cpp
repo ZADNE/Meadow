@@ -36,7 +36,10 @@ const vk::PipelineVertexInputStateCreateInfo k_vertexInput{
 constexpr vk::DrawIndirectCommand k_stalkIndirectCommandTemplate{13, 0, 0, 0};
 } // namespace
 
-StalkDrawer::StalkDrawer(vk::PipelineLayout pipelineLayout, re::DescriptorSet& descriptorSet)
+StalkDrawer::StalkDrawer(
+    vk::PipelineLayout                          pipelineLayout,
+    re::FrameDoubleBuffered<re::DescriptorSet>& descriptorSet
+)
     : m_prepareStalksPl({.pipelineLayout = pipelineLayout}, {.comp = prepareStalks_comp})
     , m_drawStalksPl(
           {.vertexInput    = &k_vertexInput,
@@ -52,7 +55,9 @@ StalkDrawer::StalkDrawer(vk::PipelineLayout pipelineLayout, re::DescriptorSet& d
           .usage       = eIndirectBuffer | eVertexBuffer | eStorageBuffer,
           .initData    = re::objectToByteSpan(k_stalkIndirectCommandTemplate),
           .initDataDstOffset = offsetof(StalkSB, command)}}) {
-    descriptorSet.write(D::eStorageBuffer, 0, 0, m_stalkBuf, 0ull, vk::WholeSize);
+    descriptorSet.forEach([&](auto& set) {
+        set.write(D::eStorageBuffer, 1, 0, m_stalkBuf, 0ull, vk::WholeSize);
+    });
 }
 
 void StalkDrawer::prerenderCompute(const vk::CommandBuffer& cmdBuf) {

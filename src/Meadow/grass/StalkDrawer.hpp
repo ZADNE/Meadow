@@ -5,6 +5,7 @@
 #include <RealEngine/graphics/buffers/Buffer.hpp>
 #include <RealEngine/graphics/descriptors/DescriptorSet.hpp>
 #include <RealEngine/graphics/pipelines/Pipeline.hpp>
+#include <RealEngine/graphics/synchronization/DoubleBuffered.hpp>
 
 namespace md {
 
@@ -13,7 +14,10 @@ namespace md {
  */
 class StalkDrawer {
 public:
-    StalkDrawer(vk::PipelineLayout pipelineLayout, re::DescriptorSet& descriptorSet);
+    StalkDrawer(
+        vk::PipelineLayout                          pipelineLayout,
+        re::FrameDoubleBuffered<re::DescriptorSet>& descriptorSet
+    );
 
     void prerenderCompute(const vk::CommandBuffer& cmdBuf);
 

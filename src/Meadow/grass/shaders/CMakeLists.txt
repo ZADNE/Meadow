@@ -5,7 +5,7 @@
     dirt.tese                   dirt.frag
     dirtTexture.glsl            
     drawStalks.vert             drawStalks.frag
-    GrassPC.glsl                
+    GrassUB.glsl                
     height.glsl                 
     prepareStalks.comp          
     StalkSB.glsl                

@@ -3,8 +3,9 @@
  */
 #version 460
 #include <Meadow/grass/shaders/height.glsl>
-#include <Meadow/grass/shaders/GrassPC.glsl>
-const uint StalkSB_BINDING = 0;
+const uint GrassUB_BINDING = 0;
+#include <Meadow/grass/shaders/GrassUB.glsl>
+const uint StalkSB_BINDING = 1;
 #include <Meadow/grass/shaders/StalkSB.glsl>
 
 layout (local_size_x = 2,
@@ -29,16 +30,15 @@ void main() {
     if (gl_LocalInvocationID.y == 0){
         vec2 pos2D = (vec2(gl_WorkGroupID.xy) - k_mapGridHalfSize) * k_mapTileSize
                     + gl_LocalInvocationID.x;
-        float h = height(pos2D, p_grass.seed);
+        float h = height(pos2D, u_grass.seed);
         stalkPos = vec3(pos2D.x, h, pos2D.y);
 
         // Test if stalk is inside frustum
-        vec4 p = p_grass.projViewMat * vec4(stalkPos, 1.0);
+        vec4 p = u_grass.cullingProjViewMat * vec4(stalkPos, 1.0);
         p.w *= 1.125;
         bool inFrustum = 
             (p.x > -p.w) && (p.x < p.w) &&
-            (p.y > -p.w) && (p.y < p.w) &&
-            (p.z > -p.w) && (p.z < p.w);
+            (p.y > -p.w) && (p.y < p.w);
 
         if (inFrustum){
             stalkIndexOffset = atomicAdd(s_stalkCount, 1);

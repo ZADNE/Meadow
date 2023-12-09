@@ -26,10 +26,16 @@ private:
 
     re::FlyingCamera3D m_camera{{0.0, -2.0, 0.0}, {0.0f, 0.0f, glm::pi<float>()}};
     glm::mat4   m_projMat = assembleProjectionMatrix(engine().windowDims());
+    glm::mat4   m_cullingProjMat;
+    glm::vec3   m_cullingCameraPos;
     glm::vec3   m_rotation{};
     glm::vec3   m_rightUpBack{};
     GrassDrawer m_grassDrawer{673.0f};
     bool        m_hiddenCursor = true;
+
+    // GUI options
+    bool m_freezeCulling    = false;
+    bool m_showTessellation = false;
 };
 
 } // namespace md

@@ -68,36 +68,43 @@ void WorldRoom::step() {
 }
 
 void WorldRoom::render(const vk::CommandBuffer& cmdBuf, double interpolationFactor) {
-    // Interpolate camera position
-    float     f = interpolationFactor;
-    glm::mat4 projViewMat =
-        m_projMat *
-        m_camera.calculateRelativeViewMat(m_rotation * f, m_rightUpBack * f);
+    glm::mat4 projViewMat = m_projMat * m_camera.viewMat();
 
-    // Prepare to render the world
+    if (!m_freezeCulling) {
+        m_cullingProjMat   = projViewMat;
+        m_cullingCameraPos = m_camera.pos();
+    }
+
+    // Prepare to render the
     m_grassDrawer.prerenderCompute(
-        cmdBuf, interpolationFactor, projViewMat, m_camera.pos()
+        cmdBuf, interpolationFactor, projViewMat, m_camera.pos(), m_cullingProjMat, m_cullingCameraPos
     );
 
     // Begin main render pass
     engine().mainRenderPassBegin();
 
     // Render the world
-    m_grassDrawer.render(cmdBuf);
+    m_grassDrawer.render(cmdBuf, m_showTessellation);
 
     // Render UI
     if (Begin("Meadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-        if (BeginTabBar("##TabBar")) {
-            if (BeginTabItem("Performance")) {
-                using namespace std::chrono;
-                ImGui::Text(
-                    "FPS: %u\nMax FT: %i us",
-                    engine().framesPerSecond(),
-                    (int)duration_cast<microseconds>(engine().maxFrameTime()).count()
-                );
-                EndTabItem();
-            }
-            EndTabBar();
+        if (TreeNodeEx("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
+            using namespace std::chrono;
+            ImGui::Text(
+                "FPS: %u\nMax FT: %i us",
+                engine().framesPerSecond(),
+                (int)duration_cast<microseconds>(engine().maxFrameTime()).count()
+            );
+            TreePop();
+        }
+        if (TreeNode("Implementation")) {
+            TextUnformatted("Freeze culling");
+            SameLine();
+            ToggleButton("FreezeCulling", &m_freezeCulling);
+            TextUnformatted("Show tessellation");
+            SameLine();
+            ToggleButton("##ShowTessellation", &m_showTessellation);
+            TreePop();
         }
     }
     End();

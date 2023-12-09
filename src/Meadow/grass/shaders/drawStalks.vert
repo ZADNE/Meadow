@@ -2,9 +2,8 @@
  *  @author     Dubsky Tomas
  */
 #version 460
-const uint StalkSB_BINDING = 0;
-#include <Meadow/grass/shaders/StalkSB.glsl>
-#include <Meadow/grass/shaders/GrassPC.glsl>
+const uint GrassUB_BINDING = 0;
+#include <Meadow/grass/shaders/GrassUB.glsl>
 
 layout (location = 0) out vec4 o_color;
 
@@ -29,6 +28,6 @@ void main() {
     vec2 offset = k_stalkOffsets[gl_VertexIndex >> 1] * sizeScale;
     offset.x *= float(gl_VertexIndex & 1) * 2.0 - 1.0;
     pos.xy += offset;
-    gl_Position = p_grass.projViewMat * vec4(pos, 1.0);
+    gl_Position = u_grass.projViewMat * vec4(pos, 1.0);
     o_color = vec4(0.0, 1.0, 0.0, 1.0);
 }

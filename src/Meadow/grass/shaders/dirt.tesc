@@ -3,7 +3,8 @@
  */
 #version 460
 #include <Meadow/grass/shaders/height.glsl>
-#include <Meadow/grass/shaders/GrassPC.glsl>
+const uint GrassUB_BINDING = 0;
+#include <Meadow/grass/shaders/GrassUB.glsl>
 
 layout (vertices = 4) out;
 layout (location = 0) out vec2  o_pos2D[];
@@ -24,17 +25,17 @@ void main() {
 
     // Outer tessellation level
     vec2 edge2D = i_center[0] + k_edgeOffsets[gl_InvocationID];
-    float dist = distance(p_grass.cameraPos.xyz, vec3(edge2D.x, height(edge2D, p_grass.seed), edge2D.y));
+    float dist = distance(u_grass.cullingCameraPos.xyz, vec3(edge2D.x, height(edge2D, u_grass.seed), edge2D.y));
     gl_TessLevelOuter[gl_InvocationID] = max(16.0 - dist * 0.0625, 1.0);
 
     // Test whether each point is inside frustum
-    float h = height(o_pos2D[gl_InvocationID], p_grass.seed);
-    vec4 p = p_grass.projViewMat * vec4(o_pos2D[gl_InvocationID].x, h, o_pos2D[gl_InvocationID].y, 1.0);
+    float h = height(o_pos2D[gl_InvocationID], u_grass.seed);
+    vec4 p = u_grass.cullingProjViewMat * vec4(o_pos2D[gl_InvocationID].x, h, o_pos2D[gl_InvocationID].y, 1.0);
     p.w *= 1.125;
     o_cull[gl_InvocationID] = ivec3(
         int(p.x < -p.w) - int(p.x > p.w),
         int(p.y < -p.w) - int(p.y > p.w),
-        int(p.z < -p.w) - int(p.z > p.w));
+                        - int(p.z > p.w));
     barrier();
 
     // Frustum cull if all points are outside frustum

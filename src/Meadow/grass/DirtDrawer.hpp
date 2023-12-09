@@ -13,11 +13,11 @@ class DirtDrawer {
 public:
     explicit DirtDrawer(vk::PipelineLayout pipelineLayout);
 
-    void render(const vk::CommandBuffer& cmdBuf);
+    void render(const vk::CommandBuffer& cmdBuf, bool showTessellation);
 
 private:
     re::Pipeline m_drawDirtPl;
-    re::Pipeline m_debugPl;
+    re::Pipeline m_debugDirtPl;
 };
 
 } // namespace md
