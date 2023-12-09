@@ -16,15 +16,12 @@ struct Stalk {
     glm::vec2 padding;
 };
 
-#pragma warning(push)
-#pragma warning(disable : 4200)
 struct StalkSB {
     // Header
     vk::DrawIndirectCommand command;
 
     // Stalks
-    Stalk stalks[];
+    Stalk stalks[262143];
 };
-#pragma warning(pop)
 
 } // namespace md

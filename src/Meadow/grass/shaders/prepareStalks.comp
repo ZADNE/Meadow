@@ -7,19 +7,54 @@
 const uint StalkSB_BINDING = 0;
 #include <Meadow/grass/shaders/StalkSB.glsl>
 
-layout (local_size_x = 32,
-        local_size_y = 1,
+layout (local_size_x = 2,
+        local_size_y = 16,
         local_size_z = 1
 ) in;
 
-void main() {
-    const uint workGroupIndex = gl_WorkGroupID.y * k_mapGridSize.x + gl_WorkGroupID.x;
+shared uint s_stalkCount;
+shared uint s_stalkBaseIndex;
 
-    if (gl_LocalInvocationIndex == 0){
-        vec2 pos2D = (vec2(gl_WorkGroupID.xy) - k_mapGridHalfSize) * k_mapTileSize;
+void main() {
+    // Initialize
+    const bool leader = gl_LocalInvocationIndex == 0;
+    if (leader){
+        s_stalkCount = 0;
+    }
+    barrier();
+
+    // Count visible stalks
+    vec3 stalkPos;
+    uint stalkIndexOffset = -1; // -1 means that it is not visible
+    if (gl_LocalInvocationID.y == 0){
+        vec2 pos2D = (vec2(gl_WorkGroupID.xy) - k_mapGridHalfSize) * k_mapTileSize
+                    + gl_LocalInvocationID.x;
         float h = height(pos2D, p_grass.seed);
-        vec3 pos = vec3(pos2D.x, h, pos2D.y);
-        b_stalk.stalks[workGroupIndex] = Stalk(vec4(pos, 1.0), vec2(0), vec2(0));
-        atomicAdd(b_stalk.command.instanceCount, 1);
+        stalkPos = vec3(pos2D.x, h, pos2D.y);
+
+        // Test if stalk is inside frustum
+        vec4 p = p_grass.projViewMat * vec4(stalkPos, 1.0);
+        p.w *= 1.125;
+        bool inFrustum = 
+            (p.x > -p.w) && (p.x < p.w) &&
+            (p.y > -p.w) && (p.y < p.w) &&
+            (p.z > -p.w) && (p.z < p.w);
+
+        if (inFrustum){
+            stalkIndexOffset = atomicAdd(s_stalkCount, 1);
+        }
+    }
+    barrier();
+
+    // Get global index
+    if (leader){
+        s_stalkBaseIndex = atomicAdd(b_stalk.command.instanceCount, s_stalkCount);
+    }
+    barrier();
+
+    // Output stalks
+    if (stalkIndexOffset != -1){
+        b_stalk.stalks[s_stalkBaseIndex + stalkIndexOffset] =
+            Stalk(vec4(stalkPos, 1.0), vec2(0), vec2(0));
     }
 }

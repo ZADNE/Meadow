@@ -48,7 +48,7 @@ StalkDrawer::StalkDrawer(vk::PipelineLayout pipelineLayout, re::DescriptorSet& d
       )
     , m_stalkBuf({re::BufferCreateInfo{
           .memoryUsage = vma::MemoryUsage::eAutoPreferDevice,
-          .sizeInBytes = sizeof(StalkSB) + sizeof(Stalk) * 128 * 128,
+          .sizeInBytes = sizeof(StalkSB),
           .usage       = eIndirectBuffer | eVertexBuffer | eStorageBuffer,
           .initData    = re::objectToByteSpan(k_stalkIndirectCommandTemplate),
           .initDataDstOffset = offsetof(StalkSB, command)}}) {

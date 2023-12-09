@@ -24,7 +24,7 @@ restrict buffer StalkSB {
     IndirectCommand command;
 
     // Stalks
-    Stalk   stalks[];
+    Stalk   stalks[262143];
 } b_stalk;
 
 #endif // !STALK_SB_GLSL
