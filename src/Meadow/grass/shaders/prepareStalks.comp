@@ -2,14 +2,15 @@
  *  @author     Dubsky Tomas
  */
 #version 460
+#include <Meadow/grass/external_shaders/float_hash.glsl>
 #include <Meadow/grass/shaders/height.glsl>
 const uint GrassUB_BINDING = 0;
 #include <Meadow/grass/shaders/GrassUB.glsl>
 const uint StalkSB_BINDING = 1;
 #include <Meadow/grass/shaders/StalkSB.glsl>
 
-layout (local_size_x = 2,
-        local_size_y = 16,
+layout (local_size_x = 64,
+        local_size_y = 1,
         local_size_z = 1
 ) in;
 
@@ -18,22 +19,27 @@ shared uint s_stalkBaseIndex;
 
 void main() {
     // Initialize
-    const bool leader = gl_LocalInvocationIndex == 0;
+    const bool  leader = gl_LocalInvocationIndex == 0;
+    const uint  workGroupIndex = gl_WorkGroupID.y * k_mapGridSize.x + gl_WorkGroupID.x;
+    const uint  globalInvocationIndex = workGroupIndex * gl_WorkGroupSize.x + gl_LocalInvocationID.x;
+    const float seed = u_grass.seed;
+    const float seededId = globalInvocationIndex + seed * 4787.0;
     if (leader){
         s_stalkCount = 0;
     }
     barrier();
 
-    // Count visible stalks
-    vec3 stalkPos;
-    uint stalkIndexOffset = -1; // -1 means that it is not visible
-    if (gl_LocalInvocationID.y == 0){
-        vec2 pos2D = (vec2(gl_WorkGroupID.xy) - k_mapGridHalfSize) * k_mapTileSize
-                    + gl_LocalInvocationID.x;
-        float h = height(pos2D, u_grass.seed);
-        stalkPos = vec3(pos2D.x, h, pos2D.y);
+    // Calculate position, rotation, etc
+    const vec2  offsetInTile = hash21(seededId);
+    const vec2  pos2D = (vec2(gl_WorkGroupID.xy) + offsetInTile - k_mapGridHalfSize) * k_mapTileSize;
+    const float h = height(pos2D, seed);
+    const vec3  stalkPos = vec3(pos2D.x, h, pos2D.y);
+    const float rotRad = hash11(seededId) * 6.28318530718;
+    const vec2  facing = vec2(cos(rotRad), sin(rotRad));
 
-        // Test if stalk is inside frustum
+    // Test if stalk is inside frustum
+    uint stalkIndexOffset = -1; // -1 means that it is not visible
+    {
         vec4 p = u_grass.cullingProjViewMat * vec4(stalkPos, 1.0);
         p.w *= 1.125;
         bool inFrustum = 
@@ -52,9 +58,12 @@ void main() {
     }
     barrier();
 
-    // Output stalks
+    // Output visible stalks
     if (stalkIndexOffset != -1){
-        b_stalk.stalks[s_stalkBaseIndex + stalkIndexOffset] =
-            Stalk(vec4(stalkPos, 1.0), vec2(0), vec2(0));
+        const uint index = s_stalkBaseIndex + stalkIndexOffset;
+        if (index < b_stalk.stalks.length()){
+            b_stalk.stalks[index] =
+                Stalk(vec4(stalkPos, 1.0), facing, vec2(0));
+        }
     }
 }
