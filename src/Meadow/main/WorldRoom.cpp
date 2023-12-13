@@ -101,7 +101,7 @@ void WorldRoom::render(const vk::CommandBuffer& cmdBuf, double interpolationFact
             TextUnformatted("Freeze culling");
             SameLine();
             ToggleButton("FreezeCulling", &m_freezeCulling);
-            TextUnformatted("Show tessellation");
+            TextUnformatted("Show dirt tessellation");
             SameLine();
             ToggleButton("##ShowTessellation", &m_showTessellation);
             TreePop();

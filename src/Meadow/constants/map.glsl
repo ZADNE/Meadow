@@ -1,8 +1,8 @@
 /*!
  *  @author     Dubsky Tomas
  */
-#ifndef MAP_CONSTANTS_SB_GLSL
-#define MAP_CONSTANTS_SB_GLSL
+#ifndef MAP_GLSL
+#define MAP_GLSL
 
 const ivec2 k_mapTileSize       = ivec2(8, 8);
 
@@ -15,4 +15,4 @@ ivec2 indexToGridPos(int index){
     return ivec2(index & k_mapGridMask.x, index >> k_mapGridBits.y) - k_mapGridHalfSize;
 }
 
-#endif // !MAP_CONSTANTS_SB_GLSL
+#endif // !MAP_GLSL

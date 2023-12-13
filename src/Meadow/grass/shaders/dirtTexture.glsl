@@ -13,7 +13,7 @@ const vec3 k_dryRich  = vec3(0.38, 0.28, 0.20);
 const vec3 k_wetSandy = vec3(0.42, 0.34, 0.24);
 const vec3 k_drySandy = vec3(0.79, 0.59, 0.39);
 
-// rgb = base color, w = shininess
+// rgb = albedo, w = shininess
 vec4 dirtTexture(vec2 pos2D, vec3 normal, float seed){
     float richness = 0.5;
     float wetness = 0.5;

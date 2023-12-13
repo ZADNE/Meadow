@@ -103,7 +103,9 @@ void GrassDrawer::render(const vk::CommandBuffer& cmdBuf, bool showTessellation)
         *m_descriptorSet.read(),
         {}
     );
-    m_stalkDrawer.render(cmdBuf);
+    if (!showTessellation) {
+        m_stalkDrawer.render(cmdBuf);
+    }
     m_dirtDrawer.render(cmdBuf, showTessellation);
 }
 
