@@ -3,7 +3,7 @@
  */
 #version 460
 #include <Meadow/terrain/external_shaders/float_hash.glsl>
-#include <Meadow/terrain/shaders/height.glsl>
+#include <Meadow/terrain/shaders/ground.glsl>
 const uint TerrainUB_BINDING = 0;
 #include <Meadow/terrain/shaders/TerrainUB.glsl>
 const uint BladeSB_BINDING = 1;
@@ -32,10 +32,10 @@ void main() {
     // Calculate position, rotation, etc
     const vec2  offsetInTile = hash21(seededId);
     const vec2  pos2D = (vec2(gl_WorkGroupID.xy) + offsetInTile - k_mapGridHalfSize) * k_mapTileSize;
-    const float h = height(pos2D, seed);
+    const float h = groundHeight(pos2D, seed);
     const vec3  bladePos = vec3(pos2D.x, h, pos2D.y);
     const float rotRad = hash11(seededId) * 6.28318530718;
-    const vec2  facing = vec2(cos(rotRad), sin(rotRad));
+    const vec2  facing = normalize(/*vec2(cos(rotRad), sin(rotRad)) +*/ vec2(u_terrain.windDir));
 
     // Test if blade is inside frustum
     uint bladeIndexOffset = -1; // -1 means that it is not visible

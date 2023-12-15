@@ -72,7 +72,7 @@ void TerrainDrawer::prerenderCompute(
     const glm::vec3&         cullingCameraPos
 ) {
     // Update uniform buffer
-    float   windDir = calculateWindDir(interpolationFactor);
+    float     windDir = calculateWindDir(interpolationFactor);
     TerrainUB tmp{
         .projViewMat        = projViewMat,
         .cullingProjViewMat = cullingProjViewMat,
@@ -95,7 +95,9 @@ void TerrainDrawer::prerenderCompute(
     m_bladeDrawer.prerenderCompute(cmdBuf);
 }
 
-void TerrainDrawer::render(const vk::CommandBuffer& cmdBuf, bool showTessellation) {
+void TerrainDrawer::render(
+    const vk::CommandBuffer& cmdBuf, bool showTessellation, bool showGrassNormals
+) {
     cmdBuf.bindDescriptorSets(
         vk::PipelineBindPoint::eGraphics,
         *m_pipelineLayout,
@@ -104,7 +106,7 @@ void TerrainDrawer::render(const vk::CommandBuffer& cmdBuf, bool showTessellatio
         {}
     );
     if (!showTessellation) {
-        m_bladeDrawer.render(cmdBuf);
+        m_bladeDrawer.render(cmdBuf, showGrassNormals);
     }
     m_dirtDrawer.render(cmdBuf, showTessellation);
 }

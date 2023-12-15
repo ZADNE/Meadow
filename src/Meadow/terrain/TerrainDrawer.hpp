@@ -33,7 +33,9 @@ public:
         const glm::vec3&         cullingCameraPos
     );
 
-    void render(const vk::CommandBuffer& cmdBuf, bool showTessellation);
+    void render(
+        const vk::CommandBuffer& cmdBuf, bool showTessellation, bool showGrassNormals
+    );
 
     void postrenderCompute(const vk::CommandBuffer& cmdBuf);
 

@@ -21,7 +21,7 @@ void main() {
     vec3 bump = dirtBump(pos2D, normal, gl_FragCoord.z, u_terrain.seed);
     vec3 toView = normalize(u_terrain.cameraPos.xyz - i_pos);
 
-    vec3 color = blinnPhong(albedoShine.rgb, bump, k_toSun, toView, albedoShine.w, 0.0625);
+    vec3 color = blinnPhong(albedoShine.rgb, bump, k_toSun, toView, albedoShine.w, vec2(0.0, 0.0625));
 
     o_color = vec4(color, 1.0);
 }

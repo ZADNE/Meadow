@@ -36,6 +36,7 @@ private:
     // GUI options
     bool m_freezeCulling    = false;
     bool m_showTessellation = false;
+    bool m_showGrassNormals = false;
 };
 
 } // namespace md

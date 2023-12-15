@@ -2,7 +2,7 @@
  *  @author     Dubsky Tomas
  */
 #version 460
-#include <Meadow/terrain/shaders/height.glsl>
+#include <Meadow/terrain/shaders/ground.glsl>
 const uint TerrainUB_BINDING = 0;
 #include <Meadow/terrain/shaders/TerrainUB.glsl>
 
@@ -25,11 +25,13 @@ void main() {
 
     // Outer tessellation level
     vec2 edge2D = i_center[0] + k_edgeOffsets[gl_InvocationID];
-    float dist = distance(u_terrain.cullingCameraPos.xyz, vec3(edge2D.x, height(edge2D, u_terrain.seed), edge2D.y));
+    float dist = distance(
+                    u_terrain.cullingCameraPos.xyz,
+                    vec3(edge2D.x, groundHeight(edge2D, u_terrain.seed), edge2D.y));
     gl_TessLevelOuter[gl_InvocationID] = max(16.0 - dist * 0.0625, 1.0);
 
     // Test whether each point is inside frustum
-    float h = height(o_pos2D[gl_InvocationID], u_terrain.seed);
+    float h = groundHeight(o_pos2D[gl_InvocationID], u_terrain.seed);
     vec4 p = u_terrain.cullingProjViewMat * vec4(o_pos2D[gl_InvocationID].x, h, o_pos2D[gl_InvocationID].y, 1.0);
     p.w *= 1.125;
     o_cull[gl_InvocationID] = ivec3(

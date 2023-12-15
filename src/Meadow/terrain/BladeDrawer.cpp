@@ -49,6 +49,14 @@ BladeDrawer::BladeDrawer(
            .pipelineLayout = pipelineLayout},
           {.vert = blades_vert, .frag = blades_frag}
       )
+    , m_drawNormalsPl(
+          {.vertexInput    = &k_vertexInput,
+           .topology       = vk::PrimitiveTopology::ePointList,
+           .enableDepth    = true,
+           .enableBlend    = false,
+           .pipelineLayout = pipelineLayout},
+          {.vert = blades_vert, .geom = debugNormal_geom, .frag = debugColor_frag}
+      )
     , m_bladeBuf({re::BufferCreateInfo{
           .memoryUsage = vma::MemoryUsage::eAutoPreferDevice,
           .sizeInBytes = sizeof(BladeSB),
@@ -65,12 +73,18 @@ void BladeDrawer::prerenderCompute(const vk::CommandBuffer& cmdBuf) {
     cmdBuf.dispatch(k_mapGridSize.x, k_mapGridSize.y, 1);
 }
 
-void BladeDrawer::render(const vk::CommandBuffer& cmdBuf) {
-    cmdBuf.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_drawBladesPl);
+void BladeDrawer::render(const vk::CommandBuffer& cmdBuf, bool showGrassNormals) {
     cmdBuf.bindVertexBuffers(0u, *m_bladeBuf, offsetof(BladeSB, blades));
+    cmdBuf.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_drawBladesPl);
     cmdBuf.drawIndirect(
         *m_bladeBuf, offsetof(BladeSB, command), 1, sizeof(vk::DrawIndirectCommand)
     );
+    if (showGrassNormals) {
+        cmdBuf.bindPipeline(vk::PipelineBindPoint::eGraphics, *m_drawNormalsPl);
+        cmdBuf.drawIndirect(
+            *m_bladeBuf, offsetof(BladeSB, command), 1, sizeof(vk::DrawIndirectCommand)
+        );
+    }
 }
 
 void BladeDrawer::postrenderCompute(const vk::CommandBuffer& cmdBuf) {

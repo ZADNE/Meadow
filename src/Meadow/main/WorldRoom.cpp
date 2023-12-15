@@ -84,7 +84,7 @@ void WorldRoom::render(const vk::CommandBuffer& cmdBuf, double interpolationFact
     engine().mainRenderPassBegin();
 
     // Render the world
-    m_terrainDrawer.render(cmdBuf, m_showTessellation);
+    m_terrainDrawer.render(cmdBuf, m_showTessellation, m_showGrassNormals);
 
     // Render UI
     if (Begin("Meadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -100,10 +100,13 @@ void WorldRoom::render(const vk::CommandBuffer& cmdBuf, double interpolationFact
         if (TreeNode("Implementation")) {
             TextUnformatted("Freeze culling");
             SameLine();
-            ToggleButton("FreezeCulling", &m_freezeCulling);
+            ToggleButton("##FreezeCulling", &m_freezeCulling);
             TextUnformatted("Show dirt tessellation");
             SameLine();
             ToggleButton("##ShowTessellation", &m_showTessellation);
+            TextUnformatted("Show grass normals");
+            SameLine();
+            ToggleButton("##ShowGrassNormals", &m_showGrassNormals);
             TreePop();
         }
     }

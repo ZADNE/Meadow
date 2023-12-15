@@ -21,13 +21,14 @@ public:
 
     void prerenderCompute(const vk::CommandBuffer& cmdBuf);
 
-    void render(const vk::CommandBuffer& cmdBuf);
+    void render(const vk::CommandBuffer& cmdBuf, bool showGrassNormals);
 
     void postrenderCompute(const vk::CommandBuffer& cmdBuf);
 
 private:
     re::Pipeline m_prepareBladesPl;
     re::Pipeline m_drawBladesPl;
+    re::Pipeline m_drawNormalsPl;
     re::Buffer   m_bladeBuf;
 };
 

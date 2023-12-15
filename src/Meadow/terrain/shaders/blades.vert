@@ -23,8 +23,6 @@ const vec2 k_bladeOffsets[] = vec2[](
 );
 
 void main() {
-    const vec2 windDir = u_terrain.windDir;
-
     // Blade size scaling
     const float size = i_posSize.w;
     const vec2 sizeScale = vec2(1.0 + (size - 1.0) * 0.5, size);
@@ -33,7 +31,7 @@ void main() {
     // Control points
     const vec3  cp0 = i_posSize.xyz; // Root
     const vec3  cp1 = cp0 + vec3(0.0, sizeScale.y * -0.5, 0.0); // Control
-    const vec3  cp2 = cp0 - sizeScale.y; // Tip
+    const vec3  cp2 = cp0 + vec3(sizeScale.y * i_facing.x, -sizeScale.y, sizeScale.y * i_facing.y); // Tip
 
     // Helper vars
     const float t = bladeOffset.y;

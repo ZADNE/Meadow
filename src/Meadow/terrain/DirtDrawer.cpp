@@ -28,7 +28,7 @@ DirtDrawer::DirtDrawer(vk::PipelineLayout pipelineLayout)
           {.vert = dirt_vert,
            .tesc = dirt_tesc,
            .tese = debugDirt_tese,
-           .geom = debugDirt_geom,
+           .geom = debugNormal_geom,
            .frag = debugColor_frag}
       ) {
 }
