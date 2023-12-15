@@ -4,8 +4,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <Meadow/constants/time.hpp>
-#include <Meadow/grass/GrassDrawer.hpp>
-#include <Meadow/grass/shaders/AllShaders.hpp>
+#include <Meadow/terrain/TerrainDrawer.hpp>
+#include <Meadow/terrain/shaders/AllShaders.hpp>
 
 using enum vk::ShaderStageFlagBits;
 using enum vk::BufferUsageFlagBits;
@@ -15,55 +15,55 @@ using D = vk::DescriptorType;
 namespace md {
 
 namespace {
-constexpr vk::ShaderStageFlags k_grassUnifferShaderStages =
+constexpr vk::ShaderStageFlags k_terrainUnifferShaderStages =
     eVertex | eTessellationControl | eTessellationEvaluation | eGeometry |
     eFragment | eCompute;
-constexpr re::BufferCreateInfo k_grassStageBufferCreateInfo{
+constexpr re::BufferCreateInfo k_terrainStageBufferCreateInfo{
     .allocFlags = vma::AllocationCreateFlagBits::eMapped |
                   vma::AllocationCreateFlagBits::eHostAccessSequentialWrite,
     .memoryUsage = vma::MemoryUsage::eAutoPreferHost,
-    .sizeInBytes = sizeof(GrassUB),
+    .sizeInBytes = sizeof(TerrainUB),
     .usage       = eTransferSrc};
-constexpr re::BufferCreateInfo k_grassBufferCreateInfo{
+constexpr re::BufferCreateInfo k_terrainBufferCreateInfo{
     .memoryUsage = vma::MemoryUsage::eAutoPreferHost,
-    .sizeInBytes = sizeof(GrassUB),
+    .sizeInBytes = sizeof(TerrainUB),
     .usage       = eTransferDst | eUniformBuffer};
 } // namespace
 
-GrassDrawer::GrassDrawer(float seed)
+TerrainDrawer::TerrainDrawer(float seed)
     : m_seed(seed)
-    , m_grassStageBuf(
-          re::BufferMapped<GrassUB>{k_grassStageBufferCreateInfo},
-          re::BufferMapped<GrassUB>{k_grassStageBufferCreateInfo}
+    , m_terrainStageBuf(
+          re::BufferMapped<TerrainUB>{k_terrainStageBufferCreateInfo},
+          re::BufferMapped<TerrainUB>{k_terrainStageBufferCreateInfo}
       )
-    , m_grassBuf(
-          re::BufferMapped<GrassUB>{k_grassBufferCreateInfo},
-          re::BufferMapped<GrassUB>{k_grassBufferCreateInfo}
+    , m_terrainBuf(
+          re::BufferMapped<TerrainUB>{k_terrainBufferCreateInfo},
+          re::BufferMapped<TerrainUB>{k_terrainBufferCreateInfo}
       )
     , m_pipelineLayout(
           {},
           re::PipelineLayoutDescription{
               .bindings =
-                  {{{0, D::eUniformBuffer, 1, k_grassUnifferShaderStages}, // Grass uniffer
-                    {1, D::eStorageBuffer, 1, eCompute}}}, // Stalk buffer
+                  {{{0, D::eUniformBuffer, 1, k_terrainUnifferShaderStages}, // Terrain uniffer
+                    {1, D::eStorageBuffer, 1, eCompute}}}, // Blade buffer
           }
       )
     , m_dirtDrawer(*m_pipelineLayout)
-    , m_stalkDrawer(*m_pipelineLayout, m_descriptorSet) {
+    , m_bladeDrawer(*m_pipelineLayout, m_descriptorSet) {
 
     m_descriptorSet.forEach(
         [](auto& set, auto& buf) {
             set.write(D::eUniformBuffer, 0, 0, buf, 0ull, vk::WholeSize);
         },
-        m_grassBuf
+        m_terrainBuf
     );
 }
 
-void GrassDrawer::step() {
+void TerrainDrawer::step() {
     m_timeSec += k_perStep;
 }
 
-void GrassDrawer::prerenderCompute(
+void TerrainDrawer::prerenderCompute(
     const vk::CommandBuffer& cmdBuf,
     double                   interpolationFactor,
     const glm::mat4&         projViewMat,
@@ -73,17 +73,17 @@ void GrassDrawer::prerenderCompute(
 ) {
     // Update uniform buffer
     float   windDir = calculateWindDir(interpolationFactor);
-    GrassUB tmp{
+    TerrainUB tmp{
         .projViewMat        = projViewMat,
         .cullingProjViewMat = cullingProjViewMat,
         .cameraPos          = glm::vec4{cameraPos, 0.0f},
         .cullingCameraPos   = glm::vec4{cullingCameraPos, 0.0f},
         .windDir            = glm::vec2{glm::cos(windDir), glm::sin(windDir)},
         .seed               = m_seed};
-    auto& stage = m_grassStageBuf.write();
+    auto& stage = m_terrainStageBuf.write();
     std::memcpy(stage.mapped(), &tmp, sizeof(tmp));
     vk::BufferCopy2 region{0, 0, sizeof(tmp)};
-    cmdBuf.copyBuffer2({stage.buffer(), *m_grassBuf.write(), region});
+    cmdBuf.copyBuffer2({stage.buffer(), *m_terrainBuf.write(), region});
 
     cmdBuf.bindDescriptorSets(
         vk::PipelineBindPoint::eCompute,
@@ -92,10 +92,10 @@ void GrassDrawer::prerenderCompute(
         *m_descriptorSet.read(),
         {}
     );
-    m_stalkDrawer.prerenderCompute(cmdBuf);
+    m_bladeDrawer.prerenderCompute(cmdBuf);
 }
 
-void GrassDrawer::render(const vk::CommandBuffer& cmdBuf, bool showTessellation) {
+void TerrainDrawer::render(const vk::CommandBuffer& cmdBuf, bool showTessellation) {
     cmdBuf.bindDescriptorSets(
         vk::PipelineBindPoint::eGraphics,
         *m_pipelineLayout,
@@ -104,16 +104,16 @@ void GrassDrawer::render(const vk::CommandBuffer& cmdBuf, bool showTessellation)
         {}
     );
     if (!showTessellation) {
-        m_stalkDrawer.render(cmdBuf);
+        m_bladeDrawer.render(cmdBuf);
     }
     m_dirtDrawer.render(cmdBuf, showTessellation);
 }
 
-void GrassDrawer::postrenderCompute(const vk::CommandBuffer& cmbBuf) {
-    m_stalkDrawer.postrenderCompute(cmbBuf);
+void TerrainDrawer::postrenderCompute(const vk::CommandBuffer& cmbBuf) {
+    m_bladeDrawer.postrenderCompute(cmbBuf);
 }
 
-float GrassDrawer::calculateWindDir(float interpolationFactor) const {
+float TerrainDrawer::calculateWindDir(float interpolationFactor) const {
     float windDir    = 0.0f;
     float timeScaled = (m_timeSec + interpolationFactor * 0.02f) / 128.0f;
     float amplitude  = glm::pi<float>();

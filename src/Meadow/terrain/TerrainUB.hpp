@@ -6,7 +6,7 @@
 
 namespace md {
 
-struct GrassUB {
+struct TerrainUB {
     glm::mat4 projViewMat;
     glm::mat4 cullingProjViewMat;
     glm::vec4 cameraPos;        // w unused

@@ -4,8 +4,8 @@
 #include <glm/vec2.hpp>
 
 #include <Meadow/constants/map.hpp>
-#include <Meadow/grass/DirtDrawer.hpp>
-#include <Meadow/grass/shaders/AllShaders.hpp>
+#include <Meadow/terrain/DirtDrawer.hpp>
+#include <Meadow/terrain/shaders/AllShaders.hpp>
 
 namespace md {
 

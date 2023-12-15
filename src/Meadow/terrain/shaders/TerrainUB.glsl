@@ -5,14 +5,14 @@
 #define GRASS_UB_GLSL
 
 #extension GL_EXT_scalar_block_layout : require
-layout (set = 0, binding = GrassUB_BINDING, std430)
-restrict uniform GrassUB {
+layout (set = 0, binding = TerrainUB_BINDING, std430)
+restrict uniform TerrainUB {
     mat4  projViewMat;
     mat4  cullingProjViewMat;
     vec4  cameraPos;
     vec4  cullingCameraPos;
     vec2  windDir;
     float seed;
-} u_grass;
+} u_terrain;
 
 #endif // !GRASS_UB_GLSL

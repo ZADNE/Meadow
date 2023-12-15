@@ -12,19 +12,19 @@ struct IndirectCommand {
     uint    firstInstance;
 };
 
-struct Stalk {
+struct Blade {
     vec4    posSize;
     vec2    facing;
     vec2    padding;
 };
 
-layout (set = 0, binding = StalkSB_BINDING, std430)
-restrict buffer StalkSB {
+layout (set = 0, binding = BladeSB_BINDING, std430)
+restrict buffer BladeSB {
     // Header
     IndirectCommand command;
 
-    // Stalks
-    Stalk   stalks[262143];
-} b_stalk;
+    // Blades
+    Blade blades[262143];
+} b_blade;
 
 #endif // !STALK_SB_GLSL

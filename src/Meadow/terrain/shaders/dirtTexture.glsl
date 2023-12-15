@@ -4,7 +4,7 @@
 #ifndef DIRT_TEXTURE_GLSL
 #define DIRT_TEXTURE_GLSL
 
-#include <Meadow/grass/external_shaders/snoise.glsl>
+#include <Meadow/terrain/external_shaders/snoise.glsl>
 
 const float k_distNormalizer = 1.57079632679 / (512.0 * 512.0);
 

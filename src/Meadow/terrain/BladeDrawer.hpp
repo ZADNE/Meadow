@@ -10,11 +10,11 @@
 namespace md {
 
 /**
- * @brief Draws grass stalks
+ * @brief Draws terrain blades
  */
-class StalkDrawer {
+class BladeDrawer {
 public:
-    StalkDrawer(
+    BladeDrawer(
         vk::PipelineLayout                          pipelineLayout,
         re::FrameDoubleBuffered<re::DescriptorSet>& descriptorSet
     );
@@ -26,9 +26,9 @@ public:
     void postrenderCompute(const vk::CommandBuffer& cmdBuf);
 
 private:
-    re::Pipeline m_prepareStalksPl;
-    re::Pipeline m_drawStalksPl;
-    re::Buffer   m_stalkBuf;
+    re::Pipeline m_prepareBladesPl;
+    re::Pipeline m_drawBladesPl;
+    re::Buffer   m_bladeBuf;
 };
 
 } // namespace md

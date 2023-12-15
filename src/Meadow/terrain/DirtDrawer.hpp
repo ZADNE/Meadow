@@ -7,7 +7,7 @@
 namespace md {
 
 /**
- * @brief Draws dirt below grass stalks
+ * @brief Draws dirt below grass blades
  */
 class DirtDrawer {
 public:

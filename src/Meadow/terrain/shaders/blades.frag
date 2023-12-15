@@ -2,10 +2,10 @@
  *  @author     Dubsky Tomas
  */
 #version 460
-#include <Meadow/grass/general_shaders/blinnPhong.glsl>
+#include <Meadow/terrain/general_shaders/blinnPhong.glsl>
 #include <Meadow/constants/environment.glsl>
-const uint GrassUB_BINDING = 0;
-#include <Meadow/grass/shaders/GrassUB.glsl>
+const uint TerrainUB_BINDING = 0;
+#include <Meadow/terrain/shaders/TerrainUB.glsl>
 
 layout (location = 0) out vec4 o_color;
 
@@ -18,7 +18,7 @@ void main() {
 
     float shininess = 80.0;
 
-    vec3 toView = normalize(u_grass.cameraPos.xyz - i_pos);
+    vec3 toView = normalize(u_terrain.cameraPos.xyz - i_pos);
 
     vec3 color = blinnPhong(i_albedo, normal, k_toSun, toView, shininess, 0.0625);
 

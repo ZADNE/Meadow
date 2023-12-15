@@ -2,11 +2,11 @@
  *  @author     Dubsky Tomas
  */
 #version 460
-#include <Meadow/grass/general_shaders/blinnPhong.glsl>
+#include <Meadow/terrain/general_shaders/blinnPhong.glsl>
 #include <Meadow/constants/environment.glsl>
-#include <Meadow/grass/shaders/dirtTexture.glsl>
-const uint GrassUB_BINDING = 0;
-#include <Meadow/grass/shaders/GrassUB.glsl>
+#include <Meadow/terrain/shaders/dirtTexture.glsl>
+const uint TerrainUB_BINDING = 0;
+#include <Meadow/terrain/shaders/TerrainUB.glsl>
 
 layout (location = 0) out vec4 o_color;
 
@@ -17,9 +17,9 @@ void main() {
     vec3 normal = normalize(i_normal);
     vec2 pos2D = i_pos.xz;
 
-    vec4 albedoShine = dirtTexture(pos2D, normal, u_grass.seed);
-    vec3 bump = dirtBump(pos2D, normal, gl_FragCoord.z, u_grass.seed);
-    vec3 toView = normalize(u_grass.cameraPos.xyz - i_pos);
+    vec4 albedoShine = dirtTexture(pos2D, normal, u_terrain.seed);
+    vec3 bump = dirtBump(pos2D, normal, gl_FragCoord.z, u_terrain.seed);
+    vec3 toView = normalize(u_terrain.cameraPos.xyz - i_pos);
 
     vec3 color = blinnPhong(albedoShine.rgb, bump, k_toSun, toView, albedoShine.w, 0.0625);
 

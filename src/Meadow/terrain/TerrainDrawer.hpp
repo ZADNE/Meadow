@@ -9,18 +9,18 @@
 #include <RealEngine/graphics/descriptors/DescriptorSet.hpp>
 #include <RealEngine/graphics/pipelines/PipelineLayout.hpp>
 
-#include <Meadow/grass/DirtDrawer.hpp>
-#include <Meadow/grass/GrassUB.hpp>
-#include <Meadow/grass/StalkDrawer.hpp>
+#include <Meadow/terrain/BladeDrawer.hpp>
+#include <Meadow/terrain/DirtDrawer.hpp>
+#include <Meadow/terrain/TerrainUB.hpp>
 
 namespace md {
 
 /**
- * @brief Draws dirt with grass on top of it
+ * @brief Draws dirt with terrain on top of it
  */
-class GrassDrawer {
+class TerrainDrawer {
 public:
-    explicit GrassDrawer(float seed);
+    explicit TerrainDrawer(float seed);
 
     void step();
 
@@ -46,11 +46,11 @@ private:
     re::FrameDoubleBuffered<re::DescriptorSet> m_descriptorSet{
         re::DescriptorSet{m_pipelineLayout.descriptorSetLayout(0)},
         re::DescriptorSet{m_pipelineLayout.descriptorSetLayout(0)}};
-    re::FrameDoubleBuffered<re::BufferMapped<GrassUB>> m_grassStageBuf;
-    re::FrameDoubleBuffered<re::Buffer>                m_grassBuf;
+    re::FrameDoubleBuffered<re::BufferMapped<TerrainUB>> m_terrainStageBuf;
+    re::FrameDoubleBuffered<re::Buffer>                  m_terrainBuf;
 
     DirtDrawer  m_dirtDrawer;
-    StalkDrawer m_stalkDrawer;
+    BladeDrawer m_bladeDrawer;
 };
 
 } // namespace md

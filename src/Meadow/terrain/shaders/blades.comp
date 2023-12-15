@@ -2,30 +2,30 @@
  *  @author     Dubsky Tomas
  */
 #version 460
-#include <Meadow/grass/external_shaders/float_hash.glsl>
-#include <Meadow/grass/shaders/height.glsl>
-const uint GrassUB_BINDING = 0;
-#include <Meadow/grass/shaders/GrassUB.glsl>
-const uint StalkSB_BINDING = 1;
-#include <Meadow/grass/shaders/StalkSB.glsl>
+#include <Meadow/terrain/external_shaders/float_hash.glsl>
+#include <Meadow/terrain/shaders/height.glsl>
+const uint TerrainUB_BINDING = 0;
+#include <Meadow/terrain/shaders/TerrainUB.glsl>
+const uint BladeSB_BINDING = 1;
+#include <Meadow/terrain/shaders/BladeSB.glsl>
 
 layout (local_size_x = 64,
         local_size_y = 1,
         local_size_z = 1
 ) in;
 
-shared uint s_stalkCount;
-shared uint s_stalkBaseIndex;
+shared uint s_bladeCount;
+shared uint s_bladeBaseIndex;
 
 void main() {
     // Initialize
     const bool  leader = gl_LocalInvocationIndex == 0;
     const uint  workGroupIndex = gl_WorkGroupID.y * k_mapGridSize.x + gl_WorkGroupID.x;
     const uint  globalInvocationIndex = workGroupIndex * gl_WorkGroupSize.x + gl_LocalInvocationID.x;
-    const float seed = u_grass.seed;
+    const float seed = u_terrain.seed;
     const float seededId = globalInvocationIndex + seed * 4787.0;
     if (leader){
-        s_stalkCount = 0;
+        s_bladeCount = 0;
     }
     barrier();
 
@@ -33,37 +33,37 @@ void main() {
     const vec2  offsetInTile = hash21(seededId);
     const vec2  pos2D = (vec2(gl_WorkGroupID.xy) + offsetInTile - k_mapGridHalfSize) * k_mapTileSize;
     const float h = height(pos2D, seed);
-    const vec3  stalkPos = vec3(pos2D.x, h, pos2D.y);
+    const vec3  bladePos = vec3(pos2D.x, h, pos2D.y);
     const float rotRad = hash11(seededId) * 6.28318530718;
     const vec2  facing = vec2(cos(rotRad), sin(rotRad));
 
-    // Test if stalk is inside frustum
-    uint stalkIndexOffset = -1; // -1 means that it is not visible
+    // Test if blade is inside frustum
+    uint bladeIndexOffset = -1; // -1 means that it is not visible
     {
-        vec4 p = u_grass.cullingProjViewMat * vec4(stalkPos, 1.0);
+        vec4 p = u_terrain.cullingProjViewMat * vec4(bladePos, 1.0);
         p.w *= 1.125;
         bool inFrustum = 
             (p.x > -p.w) && (p.x < p.w) &&
             (p.y > -p.w) && (p.y < p.w);
 
         if (inFrustum){
-            stalkIndexOffset = atomicAdd(s_stalkCount, 1);
+            bladeIndexOffset = atomicAdd(s_bladeCount, 1);
         }
     }
     barrier();
 
     // Get global index
     if (leader){
-        s_stalkBaseIndex = atomicAdd(b_stalk.command.instanceCount, s_stalkCount);
+        s_bladeBaseIndex = atomicAdd(b_blade.command.instanceCount, s_bladeCount);
     }
     barrier();
 
-    // Output visible stalks
-    if (stalkIndexOffset != -1){
-        const uint index = s_stalkBaseIndex + stalkIndexOffset;
-        if (index < b_stalk.stalks.length()){
-            b_stalk.stalks[index] =
-                Stalk(vec4(stalkPos, 1.0), facing, vec2(0));
+    // Output visible blades
+    if (bladeIndexOffset != -1){
+        const uint index = s_bladeBaseIndex + bladeIndexOffset;
+        if (index < b_blade.blades.length()){
+            b_blade.blades[index] =
+                Blade(vec4(bladePos, 1.0), facing, vec2(0));
         }
     }
 }

@@ -10,18 +10,18 @@
 
 namespace md {
 
-struct Stalk {
+struct Blade {
     glm::vec4 posSize;
     glm::vec2 facing;
     glm::vec2 padding;
 };
 
-struct StalkSB {
+struct BladeSB {
     // Header
     vk::DrawIndirectCommand command;
 
-    // Stalks
-    Stalk stalks[262143];
+    // Blades
+    Blade blades[262143];
 };
 
 } // namespace md

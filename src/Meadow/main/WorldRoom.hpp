@@ -6,7 +6,7 @@
 #include <RealEngine/graphics/cameras/View2D.hpp>
 #include <RealEngine/rooms/Room.hpp>
 
-#include <Meadow/grass/GrassDrawer.hpp>
+#include <Meadow/terrain/TerrainDrawer.hpp>
 
 namespace md {
 
@@ -25,13 +25,13 @@ private:
     glm::mat4 assembleProjectionMatrix(glm::vec2 windowDims) const;
 
     re::FlyingCamera3D m_camera{{0.0, -2.0, 0.0}, {0.0f, 0.0f, glm::pi<float>()}};
-    glm::mat4   m_projMat = assembleProjectionMatrix(engine().windowDims());
-    glm::mat4   m_cullingProjMat;
-    glm::vec3   m_cullingCameraPos;
-    glm::vec3   m_rotation{};
-    glm::vec3   m_rightUpBack{};
-    GrassDrawer m_grassDrawer{673.0f};
-    bool        m_hiddenCursor = true;
+    glm::mat4     m_projMat = assembleProjectionMatrix(engine().windowDims());
+    glm::mat4     m_cullingProjMat;
+    glm::vec3     m_cullingCameraPos;
+    glm::vec3     m_rotation{};
+    glm::vec3     m_rightUpBack{};
+    TerrainDrawer m_terrainDrawer{673.0f};
+    bool          m_hiddenCursor = true;
 
     // GUI options
     bool m_freezeCulling    = false;

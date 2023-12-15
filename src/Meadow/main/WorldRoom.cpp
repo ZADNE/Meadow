@@ -64,7 +64,7 @@ void WorldRoom::step() {
         engine().setRelativeCursorMode(m_hiddenCursor = !m_hiddenCursor);
     }
 
-    m_grassDrawer.step();
+    m_terrainDrawer.step();
 }
 
 void WorldRoom::render(const vk::CommandBuffer& cmdBuf, double interpolationFactor) {
@@ -75,8 +75,8 @@ void WorldRoom::render(const vk::CommandBuffer& cmdBuf, double interpolationFact
         m_cullingCameraPos = m_camera.pos();
     }
 
-    // Prepare to render the
-    m_grassDrawer.prerenderCompute(
+    // Prepare to render terrain
+    m_terrainDrawer.prerenderCompute(
         cmdBuf, interpolationFactor, projViewMat, m_camera.pos(), m_cullingProjMat, m_cullingCameraPos
     );
 
@@ -84,7 +84,7 @@ void WorldRoom::render(const vk::CommandBuffer& cmdBuf, double interpolationFact
     engine().mainRenderPassBegin();
 
     // Render the world
-    m_grassDrawer.render(cmdBuf, m_showTessellation);
+    m_terrainDrawer.render(cmdBuf, m_showTessellation);
 
     // Render UI
     if (Begin("Meadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
@@ -114,7 +114,7 @@ void WorldRoom::render(const vk::CommandBuffer& cmdBuf, double interpolationFact
     engine().mainRenderPassEnd();
 
     // Cleanup compute work before next frame
-    m_grassDrawer.postrenderCompute(cmdBuf);
+    m_terrainDrawer.postrenderCompute(cmdBuf);
 }
 
 void WorldRoom::windowResizedCallback(glm::ivec2 oldSize, glm::ivec2 newSize) {
