@@ -10,7 +10,7 @@ const uint TerrainUB_BINDING = 0;
 const uint BladeSB_BINDING = 1;
 #include <Meadow/terrain/shaders/BladeSB.glsl>
 
-layout (local_size_x = 64,
+layout (local_size_x = 128,
         local_size_y = 1,
         local_size_z = 1
 ) in;
@@ -30,10 +30,14 @@ float windStrength(vec2 pos, float seed){
     return strength;
 }
 
+const float k_2pi =    6.28318530718;
+const float k_0_25pi = 0.78539816339;
+const float k_0_2pi =  0.62831853071;
+
 void main() {
     // Initialize
     const bool  leader = gl_LocalInvocationIndex == 0;
-    const uint  workGroupIndex = gl_WorkGroupID.y * k_mapGridSize.x + gl_WorkGroupID.x;
+    const uint  workGroupIndex = gl_WorkGroupID.y * k_dirtGridSize.x + gl_WorkGroupID.x;
     const uint  globalInvocationIndex = workGroupIndex * gl_WorkGroupSize.x + gl_LocalInvocationID.x;
     const float seed = u_terrain.seed;
     const float seededId = globalInvocationIndex + seed * 4787.0;
@@ -44,12 +48,15 @@ void main() {
 
     // Calculate position, rotation, etc
     const vec2  offsetInTile = hash21(seededId);
-    const vec2  pos2D = (vec2(gl_WorkGroupID.xy) + offsetInTile - k_mapGridHalfSize) * k_mapTileSize;
+    const vec2  pos2D = (vec2(gl_WorkGroupID.xy) + offsetInTile - k_dirtGridHalfSize) * k_dirtTileSize;
     const vec3  pos = vec3(pos2D.x, groundHeight(pos2D, seed), pos2D.y);
-    const float rotRad = hash11(seededId) * 6.28318530718;
+    const float rotRad = hash11(seededId) * k_2pi;
     const vec2  facing = vec2(cos(rotRad), sin(rotRad));
     const float wind = windStrength(pos2D + u_terrain.windOffset, seed);
-    const vec2  tipOffset = normalize(vec2(0.1875, 0.5625 - wind));
+    const float baseTilt = k_0_2pi + hash11(rotRad) * k_0_25pi;
+    const float tiltRad = baseTilt;
+    const float size = 1.0 + hash11(baseTilt) * 0.25;
+    const vec2  tipOffset = vec2(cos(tiltRad), sin(tiltRad)) * size;
 
     // Test if blade is inside frustum
     uint bladeIndexOffset = -1; // -1 means that it is not visible
@@ -76,7 +83,7 @@ void main() {
         const uint index = s_bladeBaseIndex + bladeIndexOffset;
         if (index < b_blade.blades.length()){
             b_blade.blades[index] = Blade(
-                vec4(pos, hash11(rotRad)),
+                vec4(pos, hash11(size)),
                 tipOffset,
                 packSnorm2x16(facing),
                 max(wind - 0.125, 0.0));

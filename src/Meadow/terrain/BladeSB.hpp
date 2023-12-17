@@ -6,7 +6,7 @@
 #include <glm/vec4.hpp>
 #include <vulkan/vulkan.hpp>
 
-#include <Meadow/constants/map.hpp>
+#include <Meadow/constants/terrain.hpp>
 
 namespace md {
 
@@ -22,7 +22,7 @@ struct BladeSB {
     vk::DrawIndirectCommand command;
 
     // Blades
-    Blade blades[262143];
+    Blade blades[1048575];
 };
 
 } // namespace md

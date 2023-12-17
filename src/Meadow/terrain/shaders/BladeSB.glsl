@@ -3,7 +3,7 @@
  */
 #ifndef STALK_SB_GLSL
 #define STALK_SB_GLSL
-#include <Meadow/constants/map.glsl>
+#include <Meadow/constants/terrain.glsl>
 
 struct IndirectCommand {
     uint    vertexCount;
@@ -25,7 +25,7 @@ restrict buffer BladeSB {
     IndirectCommand command;
 
     // Blades
-    Blade blades[262143];
+    Blade blades[1048575];
 } b_blade;
 
 #endif // !STALK_SB_GLSL

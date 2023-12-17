@@ -82,7 +82,7 @@ BladeDrawer::BladeDrawer(
 
 void BladeDrawer::prerenderCompute(const vk::CommandBuffer& cmdBuf) {
     cmdBuf.bindPipeline(vk::PipelineBindPoint::eCompute, *m_prepareBladesPl);
-    cmdBuf.dispatch(k_mapGridSize.x, k_mapGridSize.y, 1);
+    cmdBuf.dispatch(k_dirtGridSize.x, k_dirtGridSize.y, 1);
 }
 
 void BladeDrawer::render(const vk::CommandBuffer& cmdBuf, bool showGrassNormals) {

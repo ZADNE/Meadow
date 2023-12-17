@@ -15,16 +15,16 @@ using D = vk::DescriptorType;
 namespace md {
 
 namespace {
-constexpr vk::ShaderStageFlags k_terrainUnifferShaderStages =
+constexpr vk::ShaderStageFlags k_dirtUnifferShaderStages =
     eVertex | eTessellationControl | eTessellationEvaluation | eGeometry |
     eFragment | eCompute;
-constexpr re::BufferCreateInfo k_terrainStageBufferCreateInfo{
+constexpr re::BufferCreateInfo k_dirtStageBufferCreateInfo{
     .allocFlags = vma::AllocationCreateFlagBits::eMapped |
                   vma::AllocationCreateFlagBits::eHostAccessSequentialWrite,
     .memoryUsage = vma::MemoryUsage::eAutoPreferHost,
     .sizeInBytes = sizeof(TerrainUB),
     .usage       = eTransferSrc};
-constexpr re::BufferCreateInfo k_terrainBufferCreateInfo{
+constexpr re::BufferCreateInfo k_dirtBufferCreateInfo{
     .memoryUsage = vma::MemoryUsage::eAutoPreferHost,
     .sizeInBytes = sizeof(TerrainUB),
     .usage       = eTransferDst | eUniformBuffer};
@@ -33,18 +33,18 @@ constexpr re::BufferCreateInfo k_terrainBufferCreateInfo{
 TerrainDrawer::TerrainDrawer(float seed)
     : m_seed(seed)
     , m_terrainStageBuf(
-          re::BufferMapped<TerrainUB>{k_terrainStageBufferCreateInfo},
-          re::BufferMapped<TerrainUB>{k_terrainStageBufferCreateInfo}
+          re::BufferMapped<TerrainUB>{k_dirtStageBufferCreateInfo},
+          re::BufferMapped<TerrainUB>{k_dirtStageBufferCreateInfo}
       )
     , m_terrainBuf(
-          re::BufferMapped<TerrainUB>{k_terrainBufferCreateInfo},
-          re::BufferMapped<TerrainUB>{k_terrainBufferCreateInfo}
+          re::BufferMapped<TerrainUB>{k_dirtBufferCreateInfo},
+          re::BufferMapped<TerrainUB>{k_dirtBufferCreateInfo}
       )
     , m_pipelineLayout(
           {},
           re::PipelineLayoutDescription{
               .bindings =
-                  {{{0, D::eUniformBuffer, 1, k_terrainUnifferShaderStages}, // Terrain uniffer
+                  {{{0, D::eUniformBuffer, 1, k_dirtUnifferShaderStages}, // Terrain uniffer
                     {1, D::eStorageBuffer, 1, eCompute}}}, // Blade buffer
           }
       )

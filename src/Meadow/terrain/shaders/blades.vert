@@ -66,5 +66,5 @@ void main() {
     o_normal = normalize( // Tilt normal outwards
                 normal * 0.75 +
                 sideDir * 0.25 * sideSign * sign(vertexOffset.x));
-    o_albedo = vec3(0.0, 1.0, 0.0);
+    o_albedo = vec3(0.286, 0.376, 0.106);
 }
