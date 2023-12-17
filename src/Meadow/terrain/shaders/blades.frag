@@ -16,11 +16,11 @@ layout (location = 2) in vec3 i_albedo;
 void main() {
     vec3 normal = normalize(i_normal);
 
-    float shininess = 30.0;
+    float shininess = 80.0;
 
     vec3 toView = normalize(u_terrain.cameraPos.xyz - i_pos);
 
-    vec3 color = blinnPhong(i_albedo, normal, k_toSun, toView, shininess, vec2(0.5, 0.5));
+    vec3 color = blinnPhong(i_albedo, normal, k_toSun, toView, shininess, vec2(0.5, 0.375));
 
     o_color = vec4(color, 1.0);
 }

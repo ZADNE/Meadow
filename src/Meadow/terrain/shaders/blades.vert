@@ -54,7 +54,9 @@ void main() {
         float wavePhase = i_posAndHash.w * 6.28318530718
                         + u_terrain.timeSec * (14.0 + i_posAndHash.w * 4.0)
                         + t * 4.0;
-        pos += normal * sin(wavePhase) * t * t * i_swayStrength * i_swayStrength;
+        float waveStrength = t * t * i_swayStrength * i_swayStrength;
+        pos += normal * sin(wavePhase) * waveStrength;
+        pos += sideDir * sin(wavePhase * 0.75) * waveStrength * 0.25;
     }
 
     // Offset to side from axis of the curve
