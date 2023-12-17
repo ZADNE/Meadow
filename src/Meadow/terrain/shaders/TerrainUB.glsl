@@ -11,8 +11,9 @@ restrict uniform TerrainUB {
     mat4  cullingProjViewMat;
     vec4  cameraPos;
     vec4  cullingCameraPos;
-    vec2  windDir;
+    vec2  windOffset;
     float seed;
+    float timeSec;
 } u_terrain;
 
 #endif // !GRASS_UB_GLSL

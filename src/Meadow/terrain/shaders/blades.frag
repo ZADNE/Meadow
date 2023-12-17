@@ -2,7 +2,7 @@
  *  @author     Dubsky Tomas
  */
 #version 460
-#include <Meadow/terrain/general_shaders/blinnPhong.glsl>
+#include <Meadow/terrain/external_shaders/blinnPhong.glsl>
 #include <Meadow/constants/environment.glsl>
 const uint TerrainUB_BINDING = 0;
 #include <Meadow/terrain/shaders/TerrainUB.glsl>
@@ -16,7 +16,7 @@ layout (location = 2) in vec3 i_albedo;
 void main() {
     vec3 normal = normalize(i_normal);
 
-    float shininess = 240.0;
+    float shininess = 30.0;
 
     vec3 toView = normalize(u_terrain.cameraPos.xyz - i_pos);
 

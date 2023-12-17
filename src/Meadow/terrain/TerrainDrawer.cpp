@@ -61,25 +61,28 @@ TerrainDrawer::TerrainDrawer(float seed)
 
 void TerrainDrawer::step() {
     m_timeSec += k_perStep;
+    m_windOffset += calculateWindDir() * k_perStep * 8.0f;
 }
 
 void TerrainDrawer::prerenderCompute(
     const vk::CommandBuffer& cmdBuf,
-    double                   interpolationFactor,
+    float                    interpolationFactor,
     const glm::mat4&         projViewMat,
     const glm::vec3&         cameraPos,
     const glm::mat4&         cullingProjViewMat,
     const glm::vec3&         cullingCameraPos
 ) {
     // Update uniform buffer
-    float     windDir = calculateWindDir(interpolationFactor);
+    glm::vec2 windOffset = m_windOffset +
+                           calculateWindDir() * k_perStep * interpolationFactor;
     TerrainUB tmp{
         .projViewMat        = projViewMat,
         .cullingProjViewMat = cullingProjViewMat,
         .cameraPos          = glm::vec4{cameraPos, 0.0f},
         .cullingCameraPos   = glm::vec4{cullingCameraPos, 0.0f},
-        .windDir            = glm::vec2{glm::cos(windDir), glm::sin(windDir)},
-        .seed               = m_seed};
+        .windOffset         = windOffset,
+        .seed               = m_seed,
+        .timeSec            = m_timeSec + interpolationFactor * k_perStep};
     auto& stage = m_terrainStageBuf.write();
     std::memcpy(stage.mapped(), &tmp, sizeof(tmp));
     vk::BufferCopy2 region{0, 0, sizeof(tmp)};
@@ -115,17 +118,17 @@ void TerrainDrawer::postrenderCompute(const vk::CommandBuffer& cmbBuf) {
     m_bladeDrawer.postrenderCompute(cmbBuf);
 }
 
-float TerrainDrawer::calculateWindDir(float interpolationFactor) const {
-    float windDir    = 0.0f;
-    float timeScaled = (m_timeSec + interpolationFactor * 0.02f) / 128.0f;
+glm::vec2 TerrainDrawer::calculateWindDir() const {
+    float windRad    = 0.0f;
+    float timeScaled = m_timeSec / 256.0f;
     float amplitude  = glm::pi<float>();
     for (size_t i = 0; i < 4; i++) {
-        windDir += glm::perlin(glm::vec2(timeScaled, m_seed)) * amplitude;
+        windRad += glm::perlin(glm::vec2(timeScaled, m_seed)) * amplitude;
         amplitude *= 0.5;
         timeScaled *= 2.0f;
     }
 
-    return windDir;
+    return glm::vec2{glm::cos(windRad), glm::sin(windRad)};
 }
 
 } // namespace md

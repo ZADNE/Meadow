@@ -22,13 +22,25 @@ constexpr std::array k_attributes = std::to_array<vk::VertexInputAttributeDescri
          0u,                              // Location
          0u,                              // Binding index
          vk::Format::eR32G32B32A32Sfloat, // Format
-         offsetof(Blade, posSize)         // Relative offset
+         offsetof(Blade, posAndhash)      // Relative offset
      },
      {
          1u,                        // Location
          0u,                        // Binding index
          vk::Format::eR32G32Sfloat, // Format
-         offsetof(Blade, facing)    // Relative offset
+         offsetof(Blade, tipOffset) // Relative offset
+     },
+     {
+         2u,                        // Location
+         0u,                        // Binding index
+         vk::Format::eR16G16Snorm,  // Format
+         offsetof(Blade, facingDir) // Relative offset
+     },
+     {
+         3u,                           // Location
+         0u,                           // Binding index
+         vk::Format::eR32Sfloat,       // Format
+         offsetof(Blade, swayStrength) // Relative offset
      }}
 );
 const vk::PipelineVertexInputStateCreateInfo k_vertexInput{

@@ -17,6 +17,18 @@ layout (local_size_x = 64,
 shared uint s_bladeCount;
 shared uint s_bladeBaseIndex;
 
+float windStrength(vec2 pos, float seed){
+    float strength = 0.25;
+    float s = 0.25;
+    pos *= 0.0078125; // 1/128
+    for (int i = 0; i < 3; ++i){
+        strength += snoise(pos, seed) * s;
+        pos *= 2.0;
+        s *= 0.5;
+    }
+    return strength;
+}
+
 void main() {
     // Initialize
     const bool  leader = gl_LocalInvocationIndex == 0;
@@ -32,15 +44,16 @@ void main() {
     // Calculate position, rotation, etc
     const vec2  offsetInTile = hash21(seededId);
     const vec2  pos2D = (vec2(gl_WorkGroupID.xy) + offsetInTile - k_mapGridHalfSize) * k_mapTileSize;
-    const float h = groundHeight(pos2D, seed);
-    const vec3  bladePos = vec3(pos2D.x, h, pos2D.y);
+    const vec3  pos = vec3(pos2D.x, groundHeight(pos2D, seed), pos2D.y);
     const float rotRad = hash11(seededId) * 6.28318530718;
-    const vec2  facing = normalize(/*vec2(cos(rotRad), sin(rotRad)) +*/ vec2(u_terrain.windDir));
+    const vec2  facing = vec2(cos(rotRad), sin(rotRad));
+    const float wind = windStrength(pos2D + u_terrain.windOffset, seed);
+    const vec2  tipOffset = normalize(vec2(0.1875, 0.5625 - wind));
 
     // Test if blade is inside frustum
     uint bladeIndexOffset = -1; // -1 means that it is not visible
     {
-        vec4 p = u_terrain.cullingProjViewMat * vec4(bladePos, 1.0);
+        vec4 p = u_terrain.cullingProjViewMat * vec4(pos, 1.0);
         p.w *= 1.125;
         bool inFrustum = 
             (p.x > -p.w) && (p.x < p.w) &&
@@ -62,8 +75,11 @@ void main() {
     if (bladeIndexOffset != -1){
         const uint index = s_bladeBaseIndex + bladeIndexOffset;
         if (index < b_blade.blades.length()){
-            b_blade.blades[index] =
-                Blade(vec4(bladePos, 1.0), facing, vec2(0));
+            b_blade.blades[index] = Blade(
+                vec4(pos, hash11(rotRad)),
+                tipOffset,
+                packSnorm2x16(facing),
+                max(wind - 0.125, 0.0));
         }
     }
 }

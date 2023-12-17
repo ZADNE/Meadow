@@ -26,7 +26,7 @@ public:
 
     void prerenderCompute(
         const vk::CommandBuffer& cmdBuf,
-        double                   interpolationFactor,
+        float                    interpolationFactor,
         const glm::mat4&         projViewMat,
         const glm::vec3&         cameraPos,
         const glm::mat4&         cullingProjViewMat,
@@ -40,9 +40,11 @@ public:
     void postrenderCompute(const vk::CommandBuffer& cmdBuf);
 
 private:
-    float m_seed    = 0.0f;
-    float m_timeSec = 0.0f;
-    float calculateWindDir(float interpolationFactor) const;
+    glm::vec2 calculateWindDir() const;
+
+    float     m_seed    = 0.0f;
+    float     m_timeSec = 0.0f;
+    glm::vec2 m_windOffset{};
 
     re::PipelineLayout                         m_pipelineLayout;
     re::FrameDoubleBuffered<re::DescriptorSet> m_descriptorSet{

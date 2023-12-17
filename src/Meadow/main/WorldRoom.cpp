@@ -87,7 +87,8 @@ void WorldRoom::render(const vk::CommandBuffer& cmdBuf, double interpolationFact
     m_terrainDrawer.render(cmdBuf, m_showTessellation, m_showGrassNormals);
 
     // Render UI
-    if (Begin("Meadow", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+    SetNextWindowPos(glm::ivec2(0, 0));
+    if (Begin("Click for cursor", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
         if (TreeNodeEx("Performance", ImGuiTreeNodeFlags_DefaultOpen)) {
             using namespace std::chrono;
             ImGui::Text(
