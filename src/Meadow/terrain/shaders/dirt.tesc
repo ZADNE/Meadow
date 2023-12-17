@@ -2,6 +2,7 @@
  *  @author     Dubsky Tomas
  */
 #version 460
+#include <Meadow/terrain/shaders/culling.glsl>
 #include <Meadow/terrain/shaders/ground.glsl>
 const uint TerrainUB_BINDING = 0;
 #include <Meadow/terrain/shaders/TerrainUB.glsl>
@@ -32,21 +33,13 @@ void main() {
 
     // Test whether each point is inside frustum
     float h = groundHeight(o_pos2D[gl_InvocationID], u_terrain.seed);
-    vec4 p = u_terrain.cullingProjViewMat * vec4(o_pos2D[gl_InvocationID].x, h, o_pos2D[gl_InvocationID].y, 1.0);
-    p.w *= 1.125;
-    o_cull[gl_InvocationID] = ivec3(
-        int(p.x < -p.w) - int(p.x > p.w),
-        int(p.y < -p.w) - int(p.y > p.w),
-                        - int(p.z > p.w));
+    o_cull[gl_InvocationID] = frustumPlaneSigns(
+        u_terrain.cullingProjViewMat * vec4(o_pos2D[gl_InvocationID].x, h, o_pos2D[gl_InvocationID].y, 1.0));
     barrier();
 
     // Frustum cull if all points are outside frustum
-    uvec3 notIn = uvec3(notEqual(o_cull[0], ivec3(0)));
-    uvec3 eq01  = uvec3(equal(o_cull[0], o_cull[1]));
-    uvec3 eq23  = uvec3(equal(o_cull[2], o_cull[3]));
-    uvec3 eq02  = uvec3(equal(o_cull[0], o_cull[2]));
-    bvec3 cull  = bvec3(eq01 * eq23 * eq02 * notIn);
-    gl_TessLevelOuter[gl_InvocationID] = any(cull) ? 0.0 : gl_TessLevelOuter[gl_InvocationID];
+    bool cull = shouldBeCulled(o_cull[0], o_cull[1], o_cull[2], o_cull[3]);
+    gl_TessLevelOuter[gl_InvocationID] = cull ? 0.0 : gl_TessLevelOuter[gl_InvocationID];
 
     // Inner tessellation level
     if (gl_InvocationID < 2){

@@ -4,6 +4,7 @@
 #version 460
 #include <Meadow/terrain/external_shaders/float_hash.glsl>
 #include <Meadow/terrain/shaders/ground.glsl>
+#include <Meadow/terrain/shaders/culling.glsl>
 const uint TerrainUB_BINDING = 0;
 #include <Meadow/terrain/shaders/TerrainUB.glsl>
 const uint BladeSB_BINDING = 1;
@@ -53,13 +54,12 @@ void main() {
     // Test if blade is inside frustum
     uint bladeIndexOffset = -1; // -1 means that it is not visible
     {
-        vec4 p = u_terrain.cullingProjViewMat * vec4(pos, 1.0);
-        p.w *= 1.125;
-        bool inFrustum = 
-            (p.x > -p.w) && (p.x < p.w) &&
-            (p.y > -p.w) && (p.y < p.w);
+        vec4 p = vec4(pos, 1.0);
+        ivec3 rootCull = frustumPlaneSigns(u_terrain.cullingProjViewMat * p);
+        p.xyz += vec3(tipOffset.x * facing.x, -tipOffset.y, tipOffset.x * facing.y);
+        ivec3 tipCull  = frustumPlaneSigns(u_terrain.cullingProjViewMat * p);
 
-        if (inFrustum){
+        if (!shouldBeCulled(rootCull, tipCull)){
             bladeIndexOffset = atomicAdd(s_bladeCount, 1);
         }
     }

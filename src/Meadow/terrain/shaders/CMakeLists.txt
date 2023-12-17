@@ -2,6 +2,7 @@
     blades.comp                 
     blades.vert                 blades.frag
     BladeSB.glsl                
+    culling.glsl                
     debugColor.frag             
     debugDirt.tese              
     debugNormal.geom            

@@ -48,8 +48,8 @@ void WorldRoom::step() {
 
         m_rightUpBack.x += (engine().isKeyDown(re::Key::D) > 0) -
                            (engine().isKeyDown(re::Key::A) > 0);
-        m_rightUpBack.y += (engine().isKeyDown(re::Key::T) > 0) -
-                           (engine().isKeyDown(re::Key::G) > 0);
+        m_rightUpBack.y += (engine().isKeyDown(re::Key::Space) > 0) -
+                           (engine().isKeyDown(re::Key::LCtrl) > 0);
         m_rightUpBack.z += (engine().isKeyDown(re::Key::S) > 0) -
                            (engine().isKeyDown(re::Key::W) > 0);
         float length  = glm::length(m_rightUpBack);
