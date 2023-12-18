@@ -14,6 +14,7 @@ restrict uniform TerrainUB {
     vec2  windOffset;
     float seed;
     float timeSec;
+    uint  maxBladesPerTile;
 } u_terrain;
 
 #endif // !GRASS_UB_GLSL

@@ -77,7 +77,13 @@ void WorldRoom::render(const vk::CommandBuffer& cmdBuf, double interpolationFact
 
     // Prepare to render terrain
     m_terrainDrawer.prerenderCompute(
-        cmdBuf, interpolationFactor, projViewMat, m_camera.pos(), m_cullingProjMat, m_cullingCameraPos
+        cmdBuf,
+        interpolationFactor,
+        projViewMat,
+        m_camera.pos(),
+        m_cullingProjMat,
+        m_cullingCameraPos,
+        m_showGrassNormals
     );
 
     // Begin main render pass

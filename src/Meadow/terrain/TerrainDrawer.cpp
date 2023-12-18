@@ -70,7 +70,8 @@ void TerrainDrawer::prerenderCompute(
     const glm::mat4&         projViewMat,
     const glm::vec3&         cameraPos,
     const glm::mat4&         cullingProjViewMat,
-    const glm::vec3&         cullingCameraPos
+    const glm::vec3&         cullingCameraPos,
+    bool                     limitBladeCount
 ) {
     // Update uniform buffer
     glm::vec2 windOffset = m_windOffset +
@@ -82,7 +83,8 @@ void TerrainDrawer::prerenderCompute(
         .cullingCameraPos   = glm::vec4{cullingCameraPos, 0.0f},
         .windOffset         = windOffset,
         .seed               = m_seed,
-        .timeSec            = m_timeSec + interpolationFactor * k_perStep};
+        .timeSec            = m_timeSec + interpolationFactor * k_perStep,
+        .maxBladesPerTile   = limitBladeCount ? 4u : 2048u};
     auto& stage = m_terrainStageBuf.write();
     std::memcpy(stage.mapped(), &tmp, sizeof(tmp));
     vk::BufferCopy2 region{0, 0, sizeof(tmp)};

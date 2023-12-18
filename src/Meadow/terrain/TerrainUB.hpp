@@ -14,6 +14,7 @@ struct TerrainUB {
     glm::vec2 windOffset;
     float     seed;
     float     timeSec;
+    glm::uint maxBladesPerTile;
 };
 
 } // namespace md

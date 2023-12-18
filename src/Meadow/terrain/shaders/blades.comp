@@ -64,8 +64,9 @@ void main() {
             const float distToCam = distance(pos2D, u_terrain.cullingCameraPos.xz);
             const float bladeCount = k_maxBladesPerTileRampStart - distToCam * 12.0;
             s_bladeCount = uint(clamp(bladeCount, k_minBladesPerTile, k_maxBladesPerTile));
+            const float linLod = (s_bladeCount - k_minBladesPerTile) / (k_maxBladesPerTile - k_minBladesPerTile);
+            s_bladeCount = min(s_bladeCount, u_terrain.maxBladesPerTile); // For debug purposes only
             s_bladeBaseIndex = atomicAdd(b_blade.command.instanceCount, s_bladeCount);
-            const float linLod = (s_bladeCount - k_minBladesPerTile) / (k_maxBladesPerTile - k_minBladesPerTile); 
             const float heperbolaLod = 1.0 / max(distToCam * 0.0625 - 10, 1.0);
             s_lod = (linLod + heperbolaLod) * 0.5; 
         } else {
@@ -86,7 +87,7 @@ void main() {
         const float rotRad = randomFloat() * k_2pi;
         const vec2  facing = vec2(cos(rotRad), sin(rotRad));
         const float wind = windStrength(pos2D + u_terrain.windOffset, seed);
-        const float baseTilt = k_0_2pi + randomFloat() * k_0_25pi;
+        const float baseTilt = k_0_25pi + randomFloat() * k_0_25pi;
         const float tiltRad = baseTilt - wind * k_0_5pi;
         const float size = 0.75 + randomFloat() * 0.5;
         const vec2  tiltDir = vec2(cos(tiltRad), sin(tiltRad));

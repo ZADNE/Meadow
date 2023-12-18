@@ -30,7 +30,8 @@ public:
         const glm::mat4&         projViewMat,
         const glm::vec3&         cameraPos,
         const glm::mat4&         cullingProjViewMat,
-        const glm::vec3&         cullingCameraPos
+        const glm::vec3&         cullingCameraPos,
+        bool                     limitBladeCount
     );
 
     void render(
