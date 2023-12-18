@@ -9,18 +9,17 @@ const uint TerrainUB_BINDING = 0;
 
 layout (location = 0) out vec4 o_color;
 
-layout (location = 0) in vec3 i_pos;
-layout (location = 1) in vec3 i_normal;
-layout (location = 2) in vec3 i_albedo;
+layout (location = 0) in vec3  i_pos;
+layout (location = 1) in vec3  i_normal;
+layout (location = 2) in vec3  i_albedo;
+layout (location = 3) in float i_shininess;
 
 void main() {
     vec3 normal = normalize(i_normal);
 
-    float shininess = 80.0;
-
     vec3 toView = normalize(u_terrain.cameraPos.xyz - i_pos);
 
-    vec3 color = blinnPhong(i_albedo, normal, k_toSun, toView, shininess, vec2(0.5, 0.375));
+    vec3 color = blinnPhong(i_albedo, normal, k_toSun, toView, i_shininess, vec2(0.5, 0.375));
 
     o_color = vec4(color, 1.0);
 }

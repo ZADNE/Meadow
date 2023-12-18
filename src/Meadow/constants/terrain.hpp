@@ -6,6 +6,6 @@
 
 namespace md {
 
-constexpr glm::ivec2 k_dirtGridSize = glm::ivec2(128, 128);
+constexpr glm::ivec2 k_dirtGridSize = glm::ivec2(64, 64);
 
 } // namespace md

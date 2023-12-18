@@ -22,13 +22,13 @@ constexpr std::array k_attributes = std::to_array<vk::VertexInputAttributeDescri
          0u,                              // Location
          0u,                              // Binding index
          vk::Format::eR32G32B32A32Sfloat, // Format
-         offsetof(Blade, posAndhash)      // Relative offset
+         offsetof(Blade, posAndSway)      // Relative offset
      },
      {
-         1u,                        // Location
-         0u,                        // Binding index
-         vk::Format::eR32G32Sfloat, // Format
-         offsetof(Blade, tipOffset) // Relative offset
+         1u,                       // Location
+         0u,                       // Binding index
+         vk::Format::eR16G16Snorm, // Format
+         offsetof(Blade, tiltDir)  // Relative offset
      },
      {
          2u,                        // Location
@@ -37,10 +37,16 @@ constexpr std::array k_attributes = std::to_array<vk::VertexInputAttributeDescri
          offsetof(Blade, facingDir) // Relative offset
      },
      {
-         3u,                           // Location
-         0u,                           // Binding index
-         vk::Format::eR32Sfloat,       // Format
-         offsetof(Blade, swayStrength) // Relative offset
+         3u,                     // Location
+         0u,                     // Binding index
+         vk::Format::eR32Sfloat, // Format
+         offsetof(Blade, size)   // Relative offset
+     },
+     {
+         4u,                         // Location
+         0u,                         // Binding index
+         vk::Format::eR16G16Unorm,   // Format
+         offsetof(Blade, hashAndLOD) // Relative offset
      }}
 );
 const vk::PipelineVertexInputStateCreateInfo k_vertexInput{

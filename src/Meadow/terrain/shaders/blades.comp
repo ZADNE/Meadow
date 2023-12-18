@@ -18,12 +18,12 @@ layout (local_size_x = 64,
 
 shared ivec3 s_cull[4];
 shared uint  s_bladeCount; // In this tile
-shared uint  s_waveBladeCount; // In this wave
+shared float s_lod; // For all blades of this tile, in range 0..1
 shared uint  s_bladeBaseIndex; // Base index of the wave into BladeSB
 
 float windStrength(vec2 pos, float seed){
     float strength = 0.25;
-    float s = 0.25;
+    float s = 0.375;
     pos *= 0.0078125; // 1/128
     for (int i = 0; i < 3; ++i){
         strength += snoise(pos, seed) * s;
@@ -38,8 +38,8 @@ const float k_0_5pi =  1.57079632679;
 const float k_0_25pi = 0.78539816339;
 const float k_0_2pi =  0.62831853071;
 
-const uint  k_minBladesPerTile = gl_WorkGroupSize.x;
-const uint  k_maxBladesPerTile = 1024;
+const float k_minBladesPerTile = gl_WorkGroupSize.x;
+const float k_maxBladesPerTile = 2048.0;
 const float k_maxBladesPerTileRampStart = k_maxBladesPerTile + 128.0;
 
 void main() {
@@ -47,11 +47,12 @@ void main() {
     const bool  leader = gl_LocalInvocationID.x == 0;
     const uint  workGroupIndex = gl_WorkGroupID.y * k_dirtGridSize.x + gl_WorkGroupID.x;
     const float seed = u_terrain.seed;
-    g_randomState = workGroupIndex * gl_WorkGroupSize.x + gl_LocalInvocationID.x + uint(seed * 4787);
+    g_randomState = ((workGroupIndex * gl_WorkGroupSize.x) ^ gl_LocalInvocationID.x) + uint(seed * 4787);
+    random();
 
     // Tile-level culling
     if (gl_LocalInvocationID.x < 4){
-        const vec2 corner = vec2(gl_LocalInvocationID.x & 1, gl_LocalInvocationID.x >> 1) * 2.0 - 1.0;
+        const vec2 corner = vec2(gl_LocalInvocationID.x & 1, gl_LocalInvocationID.x >> 1);
         const vec2 pos2D  = (vec2(gl_WorkGroupID.xy) + corner - k_dirtGridHalfSize) * k_dirtTileSize;
         const vec4 p      = vec4(pos2D.x, groundHeight(pos2D, seed), pos2D.y, 1.0);
         s_cull[gl_LocalInvocationID.x] = frustumPlaneSigns(u_terrain.cullingProjViewMat * p);
@@ -59,10 +60,14 @@ void main() {
     barrier();
     if (leader){
         if (!shouldBeCulled(s_cull[0], s_cull[1], s_cull[2], s_cull[3])){
-            const vec2 pos2D  = (vec2(gl_WorkGroupID.xy) + 0.5 - k_dirtGridHalfSize) * k_dirtTileSize;
-            const float invDist = k_maxBladesPerTileRampStart - distance(pos2D, u_terrain.cullingCameraPos.xz) * 3.0;
-            s_bladeCount = uint(clamp(invDist, k_minBladesPerTile, k_maxBladesPerTile));
-            s_waveBladeCount = 0;
+            const vec2  pos2D  = (vec2(gl_WorkGroupID.xy) + 0.5 - k_dirtGridHalfSize) * k_dirtTileSize;
+            const float distToCam = distance(pos2D, u_terrain.cullingCameraPos.xz);
+            const float bladeCount = k_maxBladesPerTileRampStart - distToCam * 12.0;
+            s_bladeCount = uint(clamp(bladeCount, k_minBladesPerTile, k_maxBladesPerTile));
+            s_bladeBaseIndex = atomicAdd(b_blade.command.instanceCount, s_bladeCount);
+            const float linLod = (s_bladeCount - k_minBladesPerTile) / (k_maxBladesPerTile - k_minBladesPerTile); 
+            const float heperbolaLod = 1.0 / max(distToCam * 0.0625 - 10, 1.0);
+            s_lod = (linLod + heperbolaLod) * 0.5; 
         } else {
             s_bladeCount = 0;
         }
@@ -78,45 +83,23 @@ void main() {
         const vec2  offsetInTile = hash21(seededId);
         const vec2  pos2D = (vec2(gl_WorkGroupID.xy) + offsetInTile - k_dirtGridHalfSize) * k_dirtTileSize;
         const vec3  pos = vec3(pos2D.x, groundHeight(pos2D, seed), pos2D.y);
-        const float rotRad = hash11(seededId) * k_2pi;
+        const float rotRad = randomFloat() * k_2pi;
         const vec2  facing = vec2(cos(rotRad), sin(rotRad));
         const float wind = windStrength(pos2D + u_terrain.windOffset, seed);
-        const float baseTilt = k_0_2pi + hash11(rotRad) * k_0_25pi;
-        const float tiltRad = baseTilt - wind * k_0_2pi;
-        const float size = 1.0 + hash11(baseTilt) * 0.25;
-        const vec2  tipOffset = vec2(cos(tiltRad), sin(tiltRad)) * size;
-
-        // Test if the blade is inside frustum
-        uint bladeIndexOffset = -1; // -1 means that it is not visible
-        {
-            vec4 p = vec4(pos, 1.0);
-            ivec3 rootCull = frustumPlaneSigns(u_terrain.cullingProjViewMat * p);
-            p.xyz += vec3(tipOffset.x * facing.x, -tipOffset.y, tipOffset.x * facing.y);
-            ivec3 tipCull  = frustumPlaneSigns(u_terrain.cullingProjViewMat * p);
-
-            if (!shouldBeCulled(rootCull, tipCull)){
-                bladeIndexOffset = atomicAdd(s_waveBladeCount, 1);
-            }
-        }
-        barrier();
-
-        // Get global index
-        if (leader){
-            s_bladeBaseIndex = atomicAdd(b_blade.command.instanceCount, s_waveBladeCount);
-            s_waveBladeCount = 0;
-        }
-        barrier();
+        const float baseTilt = k_0_2pi + randomFloat() * k_0_25pi;
+        const float tiltRad = baseTilt - wind * k_0_5pi;
+        const float size = 0.75 + randomFloat() * 0.5;
+        const vec2  tiltDir = vec2(cos(tiltRad), sin(tiltRad));
 
         // Output visible blades
-        if (bladeIndexOffset != -1){
-            const uint index = s_bladeBaseIndex + bladeIndexOffset;
-            if (index < b_blade.blades.length()){
-                b_blade.blades[index] = Blade(
-                    vec4(pos, hash11(size)),
-                    tipOffset,
-                    packSnorm2x16(facing),
-                    max(wind, 0.0));
-            }
+        const uint index = s_bladeBaseIndex + bladeIndex;
+        if (index < b_blade.blades.length()){
+            b_blade.blades[index] = Blade(
+                vec4(pos, wind),
+                packSnorm2x16(tiltDir),
+                packSnorm2x16(facing),
+                size,
+                packUnorm2x16(vec2(hash11(seededId), s_lod)));
         }
 
         bladeIndex += gl_WorkGroupSize.x;

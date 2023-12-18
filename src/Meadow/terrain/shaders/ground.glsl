@@ -6,14 +6,14 @@
 
 #include <Meadow/terrain/external_shaders/snoise.glsl>
 
-const float k_distNormalizer = 1.57079632679 / (512.0 * 512.0);
+const float k_distNormalizer = 1.57079632679 / (256.0 * 256.0);
 
 float groundHeight(vec2 pos, float seed){
     // Valley height
     float distSq = dot(pos, pos);
     vec2 dir = normalize(pos + 0.0001);
     float distortion = 1.0 + snoise(dir, seed) * 0.25;
-    float valleyHeight = sin(distSq * distortion * k_distNormalizer) * -64.0;
+    float valleyHeight = sin(distSq * distortion * k_distNormalizer) * -20.0;
 
     // Fractal-noise height
     float noiseHeight = 0.0;

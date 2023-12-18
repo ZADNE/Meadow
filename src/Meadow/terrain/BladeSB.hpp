@@ -2,7 +2,6 @@
  *  @author     Dubsky Tomas
  */
 #pragma once
-#include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
 #include <vulkan/vulkan.hpp>
 
@@ -11,10 +10,12 @@
 namespace md {
 
 struct Blade {
-    glm::vec4 posAndhash; // xyz = root position, w = random hash in range 0..1
-    glm::vec2 tipOffset;  // x = horizontal, y = vertical
-    glm::uint facingDir;  // packed vec2
-    float     swayStrength;
+    glm::vec4 posAndSway; // xyz = root position, w = sway strength
+    glm::uint tiltDir;    // packed vec2; x = horizontal, y = vertical
+    glm::uint facingDir;  // packed vec2; x = x, y = z
+    float     size;
+    glm::uint hashAndLOD; // packed vec2; x = random hash in range 0..1,
+                          // y = LOD factor in range 0..1
 };
 
 struct BladeSB {
