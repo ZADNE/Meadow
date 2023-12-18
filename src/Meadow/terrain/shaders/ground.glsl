@@ -4,7 +4,7 @@
 #ifndef HEIGHT_GLSL
 #define HEIGHT_GLSL
 
-#include <Meadow/terrain/external_shaders/snoise.glsl>
+#include <Meadow/generic/external_shaders/snoise.glsl>
 
 const float k_distNormalizer = 1.57079632679 / (256.0 * 256.0);
 

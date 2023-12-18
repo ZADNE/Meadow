@@ -1,4 +1,4 @@
-target_shaders(RealWorld PRIVATE
+target_shaders(Meadow PRIVATE
     blinnPhong.glsl             
     float_hash.glsl             
     psrdnoise2D.glsl            

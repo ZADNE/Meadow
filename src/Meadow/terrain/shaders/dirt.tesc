@@ -2,7 +2,7 @@
  *  @author     Dubsky Tomas
  */
 #version 460
-#include <Meadow/terrain/shaders/culling.glsl>
+#include <Meadow/generic/shaders/culling.glsl>
 #include <Meadow/terrain/shaders/ground.glsl>
 const uint TerrainUB_BINDING = 0;
 #include <Meadow/terrain/shaders/TerrainUB.glsl>

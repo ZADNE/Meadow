@@ -110,6 +110,16 @@ void WorldRoom::render(const vk::CommandBuffer& cmdBuf, double interpolationFact
             ToggleButton("##ShowGrassNormals", &m_showGrassNormals);
             TreePop();
         }
+        if (TreeNode("Controls")) {
+            TextUnformatted("Move using W/A/S/D/Space/LCtrl");
+            TextUnformatted("Increase speed with LShift");
+            TextUnformatted("Note: Even though you can move freely,");
+            TextUnformatted(
+                "      grass LOD is optimized for first person view,"
+            );
+            TextUnformatted("      not for top-down view angles.");
+            TreePop();
+        }
     }
     End();
     engine().mainRenderPassDrawImGui();

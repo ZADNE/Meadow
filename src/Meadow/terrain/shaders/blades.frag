@@ -2,7 +2,7 @@
  *  @author     Dubsky Tomas
  */
 #version 460
-#include <Meadow/terrain/external_shaders/blinnPhong.glsl>
+#include <Meadow/generic/external_shaders/blinnPhong.glsl>
 #include <Meadow/constants/environment.glsl>
 const uint TerrainUB_BINDING = 0;
 #include <Meadow/terrain/shaders/TerrainUB.glsl>

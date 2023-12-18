@@ -2,10 +2,10 @@
  *  @author     Dubsky Tomas
  */
 #version 460
-#include <Meadow/terrain/external_shaders/float_hash.glsl>
-#include <Meadow/terrain/external_shaders/random.glsl>
+#include <Meadow/generic/external_shaders/float_hash.glsl>
+#include <Meadow/generic/external_shaders/random.glsl>
 #include <Meadow/terrain/shaders/ground.glsl>
-#include <Meadow/terrain/shaders/culling.glsl>
+#include <Meadow/generic/shaders/culling.glsl>
 const uint TerrainUB_BINDING = 0;
 #include <Meadow/terrain/shaders/TerrainUB.glsl>
 const uint BladeSB_BINDING = 1;

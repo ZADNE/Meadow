@@ -4,6 +4,7 @@
 #include <glm/vec2.hpp>
 
 #include <Meadow/constants/terrain.hpp>
+#include <Meadow/generic/shaders/AllShaders.hpp>
 #include <Meadow/terrain/DirtDrawer.hpp>
 #include <Meadow/terrain/shaders/AllShaders.hpp>
 

@@ -1,6 +1,7 @@
 ﻿/*!
  *  @author    Dubsky Tomas
  */
+#include <Meadow/generic/shaders/AllShaders.hpp>
 #include <Meadow/terrain/BladeDrawer.hpp>
 #include <Meadow/terrain/BladeSB.hpp>
 #include <Meadow/terrain/shaders/AllShaders.hpp>
