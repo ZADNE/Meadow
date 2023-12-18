@@ -86,6 +86,10 @@ void WorldRoom::render(const vk::CommandBuffer& cmdBuf, double interpolationFact
     // Render the world
     m_terrainDrawer.render(cmdBuf, m_showTessellation, m_showGrassNormals);
 
+    if (m_freezeCulling) {
+        m_viewFrustumDrawer.render(cmdBuf, projViewMat, m_cullingProjMat);
+    }
+
     // Render UI
     SetNextWindowPos(glm::ivec2(0, 0));
     if (Begin("Click for cursor", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {

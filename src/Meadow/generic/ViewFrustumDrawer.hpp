@@ -10,22 +10,25 @@
 namespace md {
 
 /**
- * @brief Draws view frustum
- * @note This class is to be used for debug purposes
+ * @brief Is a silly view frustum visualizer
+ * @note This class is to be used for debug purposes only
  */
 class ViewFrustumDrawer {
 public:
-    ViewFrustumDrawer() {}
+    ViewFrustumDrawer();
 
     void render(
         const vk::CommandBuffer& cmdBuf,
         const glm::mat4&         projViewMat,
-        const glm::vec3&         cameraPos,
-        const glm::mat4&         cullingProjViewMat,
-        const glm::vec3&         cullingCameraPos
+        const glm::mat4&         cullingProjViewMat
     );
 
 private:
+    struct ViewFrustumPC {
+        glm::mat4 projViewMat;
+        glm::mat4 ndcToWorldMat;
+    } m_pc{};
+
     re::PipelineLayout m_pipelineLayout;
     re::Pipeline       m_pipeline;
 };

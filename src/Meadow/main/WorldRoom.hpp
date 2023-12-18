@@ -6,6 +6,7 @@
 #include <RealEngine/graphics/cameras/View2D.hpp>
 #include <RealEngine/rooms/Room.hpp>
 
+#include <Meadow/generic/ViewFrustumDrawer.hpp>
 #include <Meadow/terrain/TerrainDrawer.hpp>
 
 namespace md {
@@ -31,7 +32,8 @@ private:
     glm::vec3     m_rotation{};
     glm::vec3     m_rightUpBack{};
     TerrainDrawer m_terrainDrawer{673.0f};
-    bool          m_hiddenCursor = true;
+    ViewFrustumDrawer m_viewFrustumDrawer;
+    bool              m_hiddenCursor = true;
 
     // GUI options
     bool m_freezeCulling    = false;
