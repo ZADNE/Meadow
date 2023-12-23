@@ -9,7 +9,7 @@
  * @details -1 left, 0 in, +1 right for x component, analogous for y and z
  */
 ivec3 frustumPlaneSigns(vec4 p){
-    p.w *= 1.0625;
+    p.w *= 1.125;
     return ivec3(
         int(p.x < -p.w) - int(p.x > p.w),
         int(p.y < -p.w) - int(p.y > p.w),

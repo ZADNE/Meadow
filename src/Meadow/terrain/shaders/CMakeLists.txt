@@ -6,6 +6,7 @@
     dirt.vert                   dirt.tesc
     dirt.tese                   dirt.frag
     dirtTexture.glsl            
+    grassTexture.glsl           
     ground.glsl                 
     TerrainUB.glsl              
 )

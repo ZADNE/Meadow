@@ -17,7 +17,9 @@ void main() {
     vec3 normal = normalize(i_normal);
     vec2 pos2D = i_pos.xz;
 
-    vec4 albedoShine = dirtTexture(pos2D, normal, u_terrain.seed);
+    vec2 richWet = groundRichnessAndWetness(pos2D, u_terrain.seed);
+
+    vec4 albedoShine = dirtTexture(richWet, normal);
     vec3 bump = dirtBump(pos2D, normal, gl_FragCoord.z, u_terrain.seed);
     vec3 toView = normalize(u_terrain.cameraPos.xyz - i_pos);
 

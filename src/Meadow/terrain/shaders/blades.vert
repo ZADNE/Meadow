@@ -2,6 +2,8 @@
  *  @author     Dubsky Tomas
  */
 #version 460
+#include <Meadow/generic/external_shaders/snoise.glsl>
+
 const uint TerrainUB_BINDING = 0;
 #include <Meadow/terrain/shaders/TerrainUB.glsl>
 
@@ -15,6 +17,8 @@ layout (location = 1) in vec2  i_tiltDir;
 layout (location = 2) in vec2  i_facing;
 layout (location = 3) in float i_size;
 layout (location = 4) in vec2  i_hashAndLOD;
+layout (location = 5) in vec4  i_rootTint;
+layout (location = 6) in vec4  i_tipTint;
 
 const vec2 k_bladeOffsets[] = vec2[](
     vec2(0.04,      0.00001),
@@ -58,12 +62,13 @@ void main() {
     vec3 normal = cross(dir, sideDir);
 
     { // Wave sway
-        float wavePhase = hash * 6.28318530718
-                        + u_terrain.timeSec * (12.0 + hash * 8.0)
+        float phaseOffset = snoise(i_posAndSway.xz * 0.25, 13.0);
+        float wavePhase = phaseOffset * 3.14159265359
+                        + hash * 0.31415926535
+                        + u_terrain.timeSec * 12.0
                         + t * 4.0;
         float waveStrength = t * t * swayStrength * swayStrength * lod * lod;
         pos += normal * sin(wavePhase) * waveStrength;
-        pos += sideDir * sin(wavePhase * 0.75) * waveStrength * 0.25;
     }
 
     // Offset to side from axis of the curve
@@ -75,6 +80,6 @@ void main() {
     o_normal = normalize( // Tilt normal outwards
                 normal * 0.75 +
                 sideDir * 0.25 * sideSign * sign(vertexOffset.x) * lod);
-    o_albedo = vec3(0.286, 0.376, 0.106);
+    o_albedo = mix(i_rootTint.rgb, i_tipTint.rgb, 1.0 - ti * ti);
     o_shininess = 40.0 + lod * 40.0;
 }

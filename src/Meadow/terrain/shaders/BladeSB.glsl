@@ -13,11 +13,14 @@ struct IndirectCommand {
 };
 
 struct Blade {
-    vec4    posAndSway; // xyz = root position, w = sway strength
+    float   x, y, z;    // root position; broken down to avoid alignment requirements
+    float   sway;       // sway strength
     uint    tiltDir;    // packed vec2; x = horizontal, y = vertical
     uint    facingDir;  // packed vec2; x = x, y = z
-    float   size;
+    float   size;       // Length of the blade
     uint    hashAndLOD; // packed vec2; x = random hash in range 0..1, y = LOD factor in range 0..1
+    uint    rootTint;   // packed vec4
+    uint    tipTint;    // packed vec4
 };
 
 layout (set = 0, binding = BladeSB_BINDING, std430)

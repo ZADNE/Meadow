@@ -37,4 +37,20 @@ vec3 groundNormal(vec2 pos, float posHeight, float seed){
     return normalize(cross(v0, v1));
 }
 
+vec2 groundRichnessAndWetness(vec2 pos2D, float seed){
+    float richness = 0.5;
+    float wetness = 0.5;
+    {
+        vec2 p = pos2D * 0.00390625; // 1/256
+        float s = 0.5;
+        for (int i = 0; i < 5; ++i){
+            richness += snoise(p, seed + 7759.0) * s;
+            wetness += snoise(p, seed + 7103.0) * s;
+            p *= 2.0;
+            s *= 0.5;
+        }
+    }
+    return vec2(richness, wetness);
+}
+
 #endif // !HEIGHT_GLSL

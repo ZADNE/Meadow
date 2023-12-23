@@ -5,6 +5,8 @@
 #include <Meadow/generic/external_shaders/float_hash.glsl>
 #include <Meadow/generic/external_shaders/random.glsl>
 #include <Meadow/terrain/shaders/ground.glsl>
+#include <Meadow/terrain/shaders/dirtTexture.glsl>
+#include <Meadow/terrain/shaders/grassTexture.glsl>
 #include <Meadow/generic/shaders/culling.glsl>
 const uint TerrainUB_BINDING = 0;
 #include <Meadow/terrain/shaders/TerrainUB.glsl>
@@ -22,8 +24,8 @@ shared float s_lod; // For all blades of this tile, in range 0..1
 shared uint  s_bladeBaseIndex; // Base index of the wave into BladeSB
 
 float windStrength(vec2 pos, float seed){
-    float strength = 0.25;
-    float s = 0.375;
+    float strength = 0.5;
+    float s = 0.25;
     pos *= 0.0078125; // 1/128
     for (int i = 0; i < 3; ++i){
         strength += snoise(pos, seed) * s;
@@ -32,11 +34,6 @@ float windStrength(vec2 pos, float seed){
     }
     return strength;
 }
-
-const float k_2pi =    6.28318530718;
-const float k_0_5pi =  1.57079632679;
-const float k_0_25pi = 0.78539816339;
-const float k_0_2pi =  0.62831853071;
 
 const float k_minBladesPerTile = gl_WorkGroupSize.x;
 const float k_maxBladesPerTile = 2048.0;
@@ -67,8 +64,8 @@ void main() {
             const float linLod = (s_bladeCount - k_minBladesPerTile) / (k_maxBladesPerTile - k_minBladesPerTile);
             s_bladeCount = min(s_bladeCount, u_terrain.maxBladesPerTile); // For debug purposes only
             s_bladeBaseIndex = atomicAdd(b_blade.command.instanceCount, s_bladeCount);
-            const float heperbolaLod = 1.0 / max(distToCam * 0.0625 - 10, 1.0);
-            s_lod = (linLod + heperbolaLod) * 0.5; 
+            const float hyperbolaLod = 1.0 / max(distToCam * 0.0625 - 10, 1.0);
+            s_lod = (linLod + hyperbolaLod) * 0.5; 
         } else {
             s_bladeCount = 0;
         }
@@ -84,23 +81,29 @@ void main() {
         const vec2  offsetInTile = hash21(seededId);
         const vec2  pos2D = (vec2(gl_WorkGroupID.xy) + offsetInTile - k_dirtGridHalfSize) * k_dirtTileSize;
         const vec3  pos = vec3(pos2D.x, groundHeight(pos2D, seed), pos2D.y);
-        const float rotRad = randomFloat() * k_2pi;
+        const float rotRad = randomFloat() * 6.28318530718;
         const vec2  facing = vec2(cos(rotRad), sin(rotRad));
         const float wind = windStrength(pos2D + u_terrain.windOffset, seed);
-        const float baseTilt = k_0_25pi + randomFloat() * k_0_25pi;
-        const float tiltRad = baseTilt - wind * k_0_5pi;
-        const float size = 0.75 + randomFloat() * 0.5;
+        const float baseTilt = 1.25663706144 + randomFloat() * 0.31415926535; // 0.4pi + rng * 0.1pi
+        const float tiltRad = baseTilt - wind * 0.94247779607; // base - 0..0.3pi
+        const vec2  richWet = groundRichnessAndWetness(pos2D, seed);
+        const float size = 0.75 + (randomFloat() + richWet.x) * 0.25;
         const vec2  tiltDir = vec2(cos(tiltRad), sin(tiltRad));
+        const vec4  dirtTint = dirtTexture(richWet, vec3(0.0, -1.0, 0.0));
+        const vec4  grassTint = grassTexture(richWet);
 
         // Output visible blades
         const uint index = s_bladeBaseIndex + bladeIndex;
         if (index < b_blade.blades.length()){
             b_blade.blades[index] = Blade(
-                vec4(pos, wind),
+                pos.x, pos.y, pos.z,
+                max(wind * 0.5 - 0.1, 0.0),
                 packSnorm2x16(tiltDir),
                 packSnorm2x16(facing),
                 size,
-                packUnorm2x16(vec2(hash11(seededId), s_lod)));
+                packUnorm2x16(vec2(hash11(seededId), s_lod)),
+                packUnorm4x8(dirtTint),
+                packUnorm4x8(grassTint));
         }
 
         bladeIndex += gl_WorkGroupSize.x;
