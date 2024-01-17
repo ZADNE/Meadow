@@ -1,4 +1,4 @@
-# Meadow - a grass visualization demo
+# Meadow: A real-time grass rendering demo
 
 ## Features:
 
