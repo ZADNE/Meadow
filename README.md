@@ -11,7 +11,7 @@
 
 Made as a project for Advanced Computer Graphics course at BUT FIT. Graded 30/30 pts.
 
-Technical details are explained in [documentation](https://github.com/ZADNE/Meadow/blob/master/doc.pdf).
+The demo uses [RealEngine](https://github.com/ZADNE/RealEngine) library. Technical details are explained in [documentation](https://github.com/ZADNE/Meadow/blob/master/doc.pdf).
 
 ## Preview of the demo
 
